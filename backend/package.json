@@ -1,0 +1,28 @@
+{
+  "name": "buysell-backend",
+  "version": "1.0.0",
+  "description": "Backend API for buy-seller marketplace application (OLX clone)",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "import-dump": "node scripts/import-dump.mjs",
+    "create-admin": "node create-admin.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1057.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.9.7",
+    "nodemailer": "^8.0.10",
+    "sharp": "^0.34.5",
+    "twilio": "^6.0.2"
+  }
+}

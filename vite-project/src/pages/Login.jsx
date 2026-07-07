@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   CircleAlert,
 } from "lucide-react";
-import { sendLoginOtp, verifyLoginOtp } from "../api/authApi";
+import { loginUser, sendForgotPasswordOtp, resetPassword } from "../api/authApi";
 import { useAppText } from "../appText";
 import {
   completeAuthSession,
@@ -25,8 +25,12 @@ const Login = () => {
   const { t } = useAppText();
 
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [step, setStep] = useState("email");
+  
+  // Steps: 'login', 'forgot-email', 'forgot-reset'
+  const [step, setStep] = useState("login");
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
   const otpRefs = useRef([]);
@@ -40,7 +44,7 @@ const Login = () => {
     showToast.timer = window.setTimeout(() => setToast(null), 2600);
   };
 
-  const handleSendOtp = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     if (!isValidEmail) {
@@ -48,40 +52,17 @@ const Login = () => {
       return;
     }
 
-    setLoading(true);
-
-    try {
-      await sendLoginOtp({
-        email: cleanEmail,
-        purpose: "login",
-      });
-
-      setOtp(["", "", "", "", "", ""]);
-      showToast(`${t("otpSentTo")} ${cleanEmail}.`);
-      setStep("otp");
-    } catch (error) {
-      showToast(getApiErrorMessage(error), "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-
-    const enteredOtp = otp.join("");
-
-    if (enteredOtp.length !== 6) {
-      showToast("Please enter the complete OTP.", "error");
+    if (!password) {
+      showToast("Please enter your password.", "error");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await verifyLoginOtp({
+      const response = await loginUser({
         email: cleanEmail,
-        otp: enteredOtp,
+        password: password,
       });
 
       completeAuthSession(response, {
@@ -98,14 +79,71 @@ const Login = () => {
         replace: true,
       });
     } catch (error) {
-      showToast(getApiErrorMessage(error, "Invalid OTP."), "error");
+      showToast(getApiErrorMessage(error, "Invalid email or password."), "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
+  const handleSendForgotOtp = async (e) => {
+    e.preventDefault();
+
+    if (!isValidEmail) {
+      showToast("Please enter a valid email address.", "error");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await sendForgotPasswordOtp({
+        email: cleanEmail,
+        purpose: "forgot-password",
+      });
+
+      setOtp(["", "", "", "", "", ""]);
+      setNewPassword("");
+      showToast(`${t("otpSentTo")} ${cleanEmail}.`);
+      setStep("forgot-reset");
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+
+    const enteredOtp = otp.join("");
+
+    if (enteredOtp.length !== 6) {
+      showToast("Please enter the complete OTP.", "error");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      showToast("Password must be at least 6 characters.", "error");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await resetPassword({
+        email: cleanEmail,
+        otp: enteredOtp,
+        newPassword: newPassword,
+      });
+
+      showToast("Password reset successfully. Please login.");
+      setStep("login");
+      setPassword("");
+    } catch (error) {
+      showToast(getApiErrorMessage(error, "Invalid OTP."), "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOtpChange = (value, index) => {
@@ -174,15 +212,15 @@ const Login = () => {
                   <ShieldCheck size={24} />
                 </span>
                 <h1 className="mt-5 text-3xl font-black leading-tight text-[#102a43] sm:text-4xl">
-                  {t("welcome")}
+                  {step === "login" ? t("welcome") : "Reset Password"}
                 </h1>
                 <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">
-                  {t("loginSubtitle")}
+                  {step === "login" ? t("loginSubtitle") : "Recover your account access"}
                 </p>
               </div>
 
-              {step === "email" ? (
-                <form className="space-y-4" onSubmit={handleSendOtp}>
+              {step === "login" && (
+                <form className="space-y-4" onSubmit={handleLogin}>
                   <label className="block">
                     <span className="mb-2 block text-xs font-black uppercase text-slate-400">
                       Email address
@@ -192,7 +230,70 @@ const Login = () => {
                       <input
                         type="email"
                         value={email}
-                        onChange={handleEmailChange}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="name@example.com"
+                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-[#102a43] outline-none placeholder:text-slate-400"
+                      />
+                    </span>
+                  </label>
+
+                  <label className="block">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <span className="block text-xs font-black uppercase text-slate-400">
+                        Password
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setStep("forgot-email")}
+                        className="text-xs font-bold text-[#4d49b9] hover:underline"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                    <span className="flex h-13 items-center rounded-lg border border-slate-200 bg-[#fbfaff] px-3 transition focus-within:border-[#4d49b9] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#f1efff]">
+                      <ShieldCheck size={18} className="shrink-0 text-[#4d49b9]" />
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-[#102a43] outline-none placeholder:text-slate-400"
+                      />
+                    </span>
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex h-13 w-full items-center justify-center gap-2 rounded-lg bg-[#4d49b9] text-sm font-black text-white"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Logging in...
+                      </>
+                    ) : (
+                      <>
+                        {t("login")}
+                        <ArrowRight size={18} />
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
+
+              {step === "forgot-email" && (
+                <form className="space-y-4" onSubmit={handleSendForgotOtp}>
+                  <label className="block">
+                    <span className="mb-2 block text-xs font-black uppercase text-slate-400">
+                      Email address
+                    </span>
+                    <span className="flex h-13 items-center rounded-lg border border-slate-200 bg-[#fbfaff] px-3 transition focus-within:border-[#4d49b9] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#f1efff]">
+                      <Mail size={18} className="shrink-0 text-[#4d49b9]" />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         placeholder="name@example.com"
                         className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-[#102a43] outline-none placeholder:text-slate-400"
                       />
@@ -216,9 +317,20 @@ const Login = () => {
                       </>
                     )}
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setStep("login")}
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white text-sm font-black text-[#102a43]"
+                  >
+                    <RotateCcw size={16} />
+                    Back to Login
+                  </button>
                 </form>
-              ) : (
-                <form className="space-y-4" onSubmit={handleVerifyOtp}>
+              )}
+
+              {step === "forgot-reset" && (
+                <form className="space-y-4" onSubmit={handleResetPassword}>
                   <div>
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <span className="text-xs font-black uppercase text-slate-400">
@@ -247,23 +359,39 @@ const Login = () => {
                     </div>
                   </div>
 
+                  <label className="block">
+                    <span className="mb-2 block text-xs font-black uppercase text-slate-400">
+                      New Password
+                    </span>
+                    <span className="flex h-13 items-center rounded-lg border border-slate-200 bg-[#fbfaff] px-3 transition focus-within:border-[#4d49b9] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#f1efff]">
+                      <ShieldCheck size={18} className="shrink-0 text-[#4d49b9]" />
+                      <input
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Enter new password"
+                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-[#102a43] outline-none placeholder:text-slate-400"
+                      />
+                    </span>
+                  </label>
+
                   <p className="rounded-lg bg-[#f1efff] px-4 py-3 text-xs font-bold leading-5 text-[#4d49b9] ring-1 ring-[#ded9ff]">
                     {t("otpSentTo")} {cleanEmail}.
                   </p>
 
                   <button
                     type="submit"
-                    disabled={loading || otp.join("").length !== 6}
+                    disabled={loading || otp.join("").length !== 6 || newPassword.length < 6}
                     className="flex h-13 w-full items-center justify-center gap-2 rounded-lg bg-[#4d49b9] text-sm font-black text-white "
                   >
                     {loading ? (
                       <>
                         <Loader2 size={18} className="animate-spin" />
-                        {t("verifying")}
+                        Resetting...
                       </>
                     ) : (
                       <>
-                        {t("verifyLogin")}
+                        Reset Password
                         <ShieldCheck size={18} />
                       </>
                     )}
@@ -273,7 +401,7 @@ const Login = () => {
                     type="button"
                     onClick={() => {
                       setOtp(["", "", "", "", "", ""]);
-                      setStep("email");
+                      setStep("forgot-email");
                     }}
                     className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white text-sm font-black text-[#102a43]"
                   >
@@ -334,7 +462,7 @@ const Login = () => {
                         Secure login
                       </span>
                       <span className="rounded-full bg-[#f1efff] px-3 py-1 text-xs font-black text-[#4d49b9]">
-                        OTP
+                        Protected
                       </span>
                     </div>
                   </div>
@@ -345,7 +473,7 @@ const Login = () => {
                 Buy, sell, and connect with trusted local sellers.
               </h2>
               <p className="mt-3 max-w-sm text-sm font-semibold leading-6 text-white/68">
-                Sign in with your email OTP and continue your marketplace journey.
+                Sign in with your email and password to continue your marketplace journey.
               </p>
             </div>
 
@@ -354,7 +482,7 @@ const Login = () => {
                 Verified
               </span>
               <span className="rounded-lg bg-white/10 px-3 py-3 ring-1 ring-white/10">
-                Fast OTP
+                Fast Login
               </span>
               <span className="rounded-lg bg-white/10 px-3 py-3 ring-1 ring-white/10">
                 Secure

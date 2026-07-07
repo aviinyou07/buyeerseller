@@ -1,11 +1,14 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import bcrypt from 'bcryptjs';
 import {
   findUserByEmail,
+  findUserWithPasswordByEmail,
   findUserByPhone,
   findUserById,
   createUser,
+  updateUserPassword,
   saveOtp,
   findValidOtp,
   deleteOtp,
@@ -59,13 +62,13 @@ function getMailTransporter() {
   });
 }
 
-async function sendOtpEmail(email, otp, purpose = 'login') {
+async function sendOtpEmail(email, otp, purpose = 'register') {
   const transporter = getMailTransporter();
 
   const subject =
     purpose === 'register'
       ? 'Verify your BuyerSeller account'
-      : 'Your BuyerSeller login OTP';
+      : 'Your BuyerSeller Password Reset OTP';
 
   await transporter.sendMail({
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
@@ -92,11 +95,11 @@ async function sendOtpEmail(email, otp, purpose = 'login') {
 /**
  * POST /api/auth/send-otp
  *
- * Login body:
- * { email, purpose: "login" }
- *
  * Register body:
  * { fullName, email, phone, purpose: "register" }
+ *
+ * Forgot Password body:
+ * { email, purpose: "forgot-password" }
  */
 export async function sendOtp(req, res) {
   try {
@@ -105,10 +108,10 @@ export async function sendOtp(req, res) {
     const fullName = String(req.body.fullName || req.body.name || '').trim();
     const phone = normalizePhone(req.body.phone || '');
 
-    if (!purpose || !['login', 'register'].includes(purpose)) {
+    if (!purpose || !['register', 'forgot-password'].includes(purpose)) {
       return res.status(400).json({
         success: false,
-        message: 'Purpose must be login or register.',
+        message: 'Purpose must be register or forgot-password.',
       });
     }
 
@@ -119,13 +122,13 @@ export async function sendOtp(req, res) {
       });
     }
 
-    if (purpose === 'login') {
+    if (purpose === 'forgot-password') {
       const existingUser = await findUserByEmail(email);
 
       if (!existingUser) {
         return res.status(404).json({
           success: false,
-          message: 'No account found. Please register first.',
+          message: 'No account found for this email.',
         });
       }
 
@@ -192,18 +195,18 @@ export async function sendOtp(req, res) {
 }
 
 /**
- * POST /api/auth/verify-login
- * Body: { email, otp }
+ * POST /api/auth/login
+ * Body: { email, password }
  */
-export async function verifyLogin(req, res) {
+export async function login(req, res) {
   try {
     const email = normalizeEmail(req.body.email);
-    const otp = String(req.body.otp || '').trim();
+    const password = String(req.body.password || '');
 
-    if (!email || !otp) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and OTP are required.',
+        message: 'Email and password are required.',
       });
     }
 
@@ -214,16 +217,7 @@ export async function verifyLogin(req, res) {
       });
     }
 
-    const validOtp = await findValidOtp(email, otp, 'login');
-
-    if (!validOtp) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid or expired OTP.',
-      });
-    }
-
-    const user = await findUserByEmail(email);
+    const user = await findUserWithPasswordByEmail(email);
 
     if (!user) {
       return res.status(404).json({
@@ -232,23 +226,43 @@ export async function verifyLogin(req, res) {
       });
     }
 
-    await deleteOtp(email, 'login');
+    if (user.status && user.status !== 'active') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account is not active.',
+      });
+    }
+
+    if (!user.password_hash) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password not set for this user. Please use forgot password.',
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password.',
+      });
+    }
 
     const token = signToken(user.id);
 
     return res.json({
-  success: true,
-  token,
-  user: {
-    id: user.id,
-    fullName: user.full_name || user.name,
-    email: user.email,
-    phone: user.phone,
-    role: user.role,
-  },
-});
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        fullName: user.full_name || user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
+    });
   } catch (error) {
-    console.error('[verifyLogin]', error);
+    console.error('[login]', error);
 
     return res.status(500).json({
       success: false,
@@ -258,8 +272,51 @@ export async function verifyLogin(req, res) {
 }
 
 /**
+ * POST /api/auth/reset-password
+ * Body: { email, otp, newPassword }
+ */
+export async function resetPassword(req, res) {
+  try {
+    const email = normalizeEmail(req.body.email);
+    const otp = String(req.body.otp || '').trim();
+    const newPassword = String(req.body.newPassword || '');
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email, OTP, and new password are required.',
+      });
+    }
+
+    const validOtp = await findValidOtp(email, otp, 'forgot-password');
+
+    if (!validOtp) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired OTP.',
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await updateUserPassword(email, passwordHash);
+    await deleteOtp(email, 'forgot-password');
+
+    return res.json({
+      success: true,
+      message: 'Password has been reset successfully.',
+    });
+  } catch (error) {
+    console.error('[resetPassword]', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error.',
+    });
+  }
+}
+
+/**
  * POST /api/auth/verify-register
- * Body: { fullName, email, phone, otp }
+ * Body: { fullName, email, phone, otp, password }
  */
 export async function verifyRegister(req, res) {
   try {
@@ -267,11 +324,12 @@ export async function verifyRegister(req, res) {
     const email = normalizeEmail(req.body.email);
     const phone = normalizePhone(req.body.phone || '');
     const otp = String(req.body.otp || '').trim();
+    const password = String(req.body.password || '');
 
-    if (!fullName || !email || !phone || !otp) {
+    if (!fullName || !email || !phone || !otp || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Full name, email, phone and OTP are required.',
+        message: 'Full name, email, phone, password and OTP are required.',
       });
     }
 
@@ -316,11 +374,14 @@ export async function verifyRegister(req, res) {
       });
     }
 
+    const passwordHash = await bcrypt.hash(password, 10);
+
     const newId = await createUser({
       fullName,
       email,
       phone,
       role: 'user',
+      passwordHash,
     });
 
     await deleteOtp(email, 'register');

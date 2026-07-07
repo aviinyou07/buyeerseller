@@ -369,7 +369,9 @@ const Dashboard = () => {
                     </span>
                   </td>
 
-                  <td className="py-2 text-sm text-gray-800">{item.title}</td>
+                  <td className="py-2 text-sm text-gray-800" title={item.title}>
+                    {item.title?.split(' ').length > 5 ? item.title.split(' ').slice(0, 5).join(' ') + '...' : item.title}
+                  </td>
 
                   <td className="py-2 text-[14px] text-gray-800">
                     {item.user}
@@ -559,8 +561,8 @@ const Dashboard = () => {
                         "
                       />
 
-                      <span className="text-[14px] text-gray-700 font-medium">
-                        {item.title}
+                      <span className="text-[14px] text-gray-700 font-medium" title={item.title}>
+                        {item.title?.split(' ').length > 5 ? item.title.split(' ').slice(0, 5).join(' ') + '...' : item.title}
                       </span>
                     </div>
                   </td>

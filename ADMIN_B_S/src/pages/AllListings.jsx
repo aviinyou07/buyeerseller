@@ -1438,8 +1438,8 @@ const AllListings = () => {
                         />
                         <div className="flex flex-col min-w-[180px]">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[14px] font-medium text-gray-800">
-                              {item.name}
+                            <span className="text-[14px] font-medium text-gray-800" title={item.name}>
+                              {item.name?.split(' ').length > 5 ? item.name.split(' ').slice(0, 5).join(' ') + '...' : item.name}
                             </span>
                             <button
                               onClick={() =>
@@ -1504,6 +1504,17 @@ const AllListings = () => {
                     </td>
                     <td className="py-3 px-5 text-[14px] font-medium text-gray-800">
                       {item.viewsCount.toLocaleString()}
+                    </td>
+                    <td className="py-3 px-5">
+                      <span className={getStatusStyle(item.status)}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-5">
+                      <div className="flex flex-col">
+                        <span className="text-[14px] text-gray-800">{item.date}</span>
+                        <span className="text-[12px] text-gray-500">{item.time}</span>
+                      </div>
                     </td>
                     <td className="py-3 px-5 text-center">
                       <div className="flex items-center justify-center gap-2">

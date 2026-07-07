@@ -26,6 +26,7 @@ const Signup = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [step, setStep] = useState("details");
   const [loading, setLoading] = useState(false);
@@ -56,6 +57,11 @@ const Signup = () => {
 
     if (!isValidEmail) {
       showToast("Please enter a valid email address.", "error");
+      return;
+    }
+
+    if (password.length < 6) {
+      showToast("Password must be at least 6 characters.", "error");
       return;
     }
 
@@ -106,6 +112,7 @@ const Signup = () => {
         email: user.email,
         phone: user.phone,
         otp: otp.join(""),
+        password: password,
       });
 
       completeAuthSession(response, user);
@@ -242,6 +249,22 @@ const Signup = () => {
                         type="tel"
                         value={phone}
                         onChange={handlePhoneChange}
+                      />
+                    </span>
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-2 block text-xs font-black uppercase text-slate-400">
+                      Password
+                    </span>
+                    <span className="flex h-13 items-center rounded-lg border border-slate-200 bg-[#fbfaff] px-3 transition focus-within:border-[#4d49b9] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#f1efff]">
+                      <ShieldCheck size={18} className="shrink-0 text-[#4d49b9]" />
+                      <input
+                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-[#102a43] outline-none placeholder:text-slate-400"
+                        placeholder="Create a password"
+                        type="password"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
                       />
                     </span>
                   </label>

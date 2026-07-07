@@ -32,7 +32,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
-export const uploadMiddleware = upload.array('photos', 4);
+export const uploadMiddleware = upload.array('photos', 10);
 
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 function getUserFromToken(req) {

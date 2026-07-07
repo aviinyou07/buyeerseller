@@ -1,13 +1,16 @@
 import { Router } from 'express';
-import { sendOtp, verifyLogin, verifyRegister, getMe } from './auth.controller.js';
+import { sendOtp, login, verifyRegister, getMe, resetPassword } from './auth.controller.js';
 
 const router = Router();
 
 // POST /api/auth/send-otp
 router.post('/send-otp', sendOtp);
 
-// POST /api/auth/verify-login
-router.post('/verify-login', verifyLogin);
+// POST /api/auth/login
+router.post('/login', login);
+
+// POST /api/auth/reset-password
+router.post('/reset-password', resetPassword);
 
 // POST /api/auth/verify-register
 router.post('/verify-register', verifyRegister);

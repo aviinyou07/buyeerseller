@@ -530,8 +530,8 @@ const Approvals = () => {
                         </div>
 
                         <div className="flex flex-col">
-                          <span className="text-sm font-semibold text-gray-900">
-                            {item.title}
+                          <span className="text-sm font-semibold text-gray-900" title={item.title}>
+                            {item.title?.split(' ').length > 5 ? item.title.split(' ').slice(0, 5).join(' ') + '...' : item.title}
                           </span>
 
                           <span className="text-xs text-gray-500 mt-0.5">

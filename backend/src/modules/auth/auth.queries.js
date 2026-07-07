@@ -35,6 +35,22 @@ export async function findUserByEmail(email) {
   return rows[0] || null;
 }
 
+export async function findUserWithPasswordByEmail(email) {
+  const normalizedEmail = normalizeEmail(email);
+
+  const [rows] = await pool.query(
+    `SELECT id, COALESCE(name, full_name) AS name, full_name, phone, email, role,
+            password_hash,
+            COALESCE(status, account_status) AS status, created_at
+     FROM users
+     WHERE LOWER(email) = ?
+     LIMIT 1`,
+    [normalizedEmail]
+  );
+
+  return rows[0] || null;
+}
+
 export async function findUserByPhone(phone) {
   const normalizedPhone = normalizePhone(phone);
 
@@ -63,7 +79,7 @@ export async function findUserById(id) {
   return rows[0] || null;
 }
 
-export async function createUser({ fullName, email, phone, role = 'user' }) {
+export async function createUser({ fullName, email, phone, role = 'user', passwordHash = null }) {
   const normalizedEmail = normalizeEmail(email);
   const normalizedPhone = normalizePhone(phone);
 
@@ -75,6 +91,7 @@ export async function createUser({ fullName, email, phone, role = 'user' }) {
       phone,
       email,
       role,
+      password_hash,
       account_status,
       status,
       email_verified,
@@ -88,16 +105,25 @@ export async function createUser({ fullName, email, phone, role = 'user' }) {
       ?,
       ?,
       ?,
+      ?,
       'active',
       'active',
       'Yes',
       NOW(),
       NOW()
     )`,
-    [fullName, fullName, normalizedPhone, normalizedEmail, role]
+    [fullName, fullName, normalizedPhone, normalizedEmail, role, passwordHash]
   );
 
   return result.insertId;
+}
+
+export async function updateUserPassword(email, passwordHash) {
+  const normalizedEmail = normalizeEmail(email);
+  await pool.query(
+    `UPDATE users SET password_hash = ?, updated_at = NOW() WHERE LOWER(email) = ?`,
+    [passwordHash, normalizedEmail]
+  );
 }
 
 // ─── OTP Store ────────────────────────────────────────────────────────────────

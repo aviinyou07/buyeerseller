@@ -9,6 +9,8 @@ import {
   Plus,
   Sparkles,
   Trash2,
+  X,
+  RefreshCw,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getCategories, getCategoryForm } from "../api/categoriesApi";
@@ -462,12 +464,13 @@ const AddListing = () => {
     label: "",
     type: "text",
   });
-  const [listingPhotos, setListingPhotos] = useState(() =>
-    isEditing
-      ? (editingListing?.photos?.length ? editingListing.photos : [editingListing?.image]).filter(Boolean).slice(0, 4)
-      : [],
-  );
-  const [listingPhotoFiles, setListingPhotoFiles] = useState([]);
+  const [listingPhotos, setListingPhotos] = useState(() => {
+    const initialUrls = isEditing
+      ? (editingListing?.photos?.length ? editingListing.photos : [editingListing?.image]).filter(Boolean).slice(0, 10)
+      : [];
+    return initialUrls.map(url => ({ url, file: null, id: Math.random().toString(36).substr(2, 9) }));
+  });
+  const [draggedIndex, setDraggedIndex] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
   const [toast, setToast] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -485,7 +488,8 @@ const AddListing = () => {
         if (isMounted) {
           setEditingListing(nextListing);
           setCustomFields(getCustomFieldsForListing(nextListing));
-          setListingPhotos((nextListing.photos?.length ? nextListing.photos : [nextListing.image]).filter(Boolean).slice(0, 4));
+          const initialUrls = (nextListing.photos?.length ? nextListing.photos : [nextListing.image]).filter(Boolean).slice(0, 10);
+          setListingPhotos(initialUrls.map(url => ({ url, file: null, id: Math.random().toString(36).substr(2, 9) })));
         }
       } catch (error) {
         console.error("[AddListing.loadEditingListing]", error);
@@ -493,7 +497,8 @@ const AddListing = () => {
           const fallbackListing = normalizeProduct(routeEditingListing);
           setEditingListing(fallbackListing);
           setCustomFields(getCustomFieldsForListing(fallbackListing));
-          setListingPhotos((fallbackListing.photos?.length ? fallbackListing.photos : [fallbackListing.image]).filter(Boolean).slice(0, 4));
+          const fallbackUrls = (fallbackListing.photos?.length ? fallbackListing.photos : [fallbackListing.image]).filter(Boolean).slice(0, 10);
+          setListingPhotos(fallbackUrls.map(url => ({ url, file: null, id: Math.random().toString(36).substr(2, 9) })));
         }
       }
     };
@@ -743,22 +748,76 @@ const AddListing = () => {
 
     if (!selectedFiles.length) return;
 
-    const availableSlots = Math.max(4 - listingPhotoFiles.length, 0);
+    const availableSlots = Math.max(10 - listingPhotos.length, 0);
     if (availableSlots === 0) {
-      showToast("You can upload up to 4 photos only.");
+      showToast("You can upload up to 10 photos only.");
       event.target.value = "";
       return;
     }
 
     if (selectedFiles.length > availableSlots) {
-      showToast("You can upload up to 4 photos only.");
+      showToast("You can upload up to 10 photos only.");
     }
 
-    const nextFiles = [...listingPhotoFiles, ...selectedFiles.slice(0, availableSlots)];
-    const previews = nextFiles.map((file) => URL.createObjectURL(file));
-    setListingPhotoFiles(nextFiles);
-    setListingPhotos(previews);
+    const addedFiles = selectedFiles.slice(0, availableSlots);
+    const newPhotos = addedFiles.map(file => ({
+      url: URL.createObjectURL(file),
+      file,
+      id: Math.random().toString(36).substr(2, 9)
+    }));
+
+    setListingPhotos(current => [...current, ...newPhotos]);
     event.target.value = "";
+  };
+
+  const handleRemovePhoto = (index) => {
+    setListingPhotos(current => current.filter((_, i) => i !== index));
+  };
+
+  const handleReplacePhoto = (event, index) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    setListingPhotos(current => {
+      const next = [...current];
+      next[index] = {
+        url: URL.createObjectURL(file),
+        file,
+        id: Math.random().toString(36).substr(2, 9)
+      };
+      return next;
+    });
+    event.target.value = "";
+  };
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    setTimeout(() => {
+      e.target.style.opacity = '0.5';
+    }, 0);
+  };
+  
+  const handleDragEnd = (e) => {
+    setDraggedIndex(null);
+    e.target.style.opacity = '1';
+  };
+  
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+  
+  const handleDrop = (e, targetIndex) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) return;
+    
+    setListingPhotos(current => {
+      const next = [...current];
+      const [draggedItem] = next.splice(draggedIndex, 1);
+      next.splice(targetIndex, 0, draggedItem);
+      return next;
+    });
   };
 
   const resetForm = () => {
@@ -772,8 +831,8 @@ const AddListing = () => {
       type: "text",
     });
     setListingPhotos([]);
-    setListingPhotoFiles([]);
     setValidationErrors({});
+    setDraggedIndex(null);
   };
 
   const handlePostListing = async () => {
@@ -879,8 +938,8 @@ const AddListing = () => {
       }),
     );
 
-    listingPhotoFiles.forEach((file) => {
-      productFormData.append("photos", file);
+    listingPhotos.filter(p => p.file).forEach((p) => {
+      productFormData.append("photos", p.file);
     });
 
     try {
@@ -1200,51 +1259,72 @@ const AddListing = () => {
             </div>
           </div>
 
-          <label className="mt-3 flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-[#c9c8ff] bg-[#fbfaff] px-4 py-5 text-center">
-            <ImagePlus className="size-7 text-[#4d49b9]" />
-            <span className="text-sm font-black text-[#102a43]">
-              {t("addProductPhotos")}
-            </span>
-            <span className="text-sm font-semibold text-slate-500">
-              {t("photoHelp")}
-            </span>
+          <div className="mt-3">
+            <label className="flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-[#c9c8ff] bg-[#fbfaff] px-4 py-5 text-center transition hover:bg-[#f1efff]">
+              <ImagePlus className="size-7 text-[#4d49b9]" />
+              <span className="text-sm font-black text-[#102a43]">
+                {t("addProductPhotos")}
+              </span>
+              <span className="text-sm font-semibold text-slate-500">
+                You can add up to 10 photos. Drag to reorder.
+              </span>
+              <input
+                accept="image/*"
+                className="hidden"
+                multiple
+                type="file"
+                onChange={handlePhotoUpload}
+              />
+            </label>
+            
             {listingPhotos.length > 0 && (
-              <div className="mt-2 grid grid-cols-4 gap-2">
-                {Array.from({ length: 4 }).map((_, index) => {
-                  const photo = listingPhotos[index];
+              <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
+                {listingPhotos.map((photoObj, index) => (
+                  <div
+                    key={photoObj.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDrop={(e) => handleDrop(e, index)}
+                    className="group relative grid aspect-square place-items-center overflow-hidden border border-[#ded2ff] bg-white cursor-move"
+                  >
+                    <img
+                      alt={`Upload ${index + 1}`}
+                      className="h-full w-full object-cover"
+                      src={photoObj.url}
+                    />
+                    
+                    {index === 0 && (
+                      <span className="absolute bottom-0 left-0 right-0 bg-[#4d49b9] py-0.5 text-center text-[9px] font-black text-white">
+                        Main
+                      </span>
+                    )}
 
-                  return (
-                    <span
-                      className="relative grid size-16 place-items-center overflow-hidden border border-[#ded2ff] bg-white text-[10px] font-black text-slate-400"
-                      key={photo || index}
-                    >
-                      {photo ? (
-                        <img
-                          alt={t("selectedListing")}
-                          className="h-full w-full object-cover"
-                          src={photo}
+                    <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                      <label className="cursor-pointer rounded-full bg-white/20 p-1.5 text-white backdrop-blur-sm transition hover:bg-white/40">
+                        <RefreshCw className="size-4" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleReplacePhoto(e, index)}
                         />
-                      ) : (
-                        index + 1
-                      )}
-                      {index === 0 && photo && (
-                        <span className="absolute bottom-0 left-0 right-0 bg-[#4d49b9] py-0.5 text-[9px] font-black text-white">
-                          Main
-                        </span>
-                      )}
-                    </span>
-                  );
-                })}
+                      </label>
+                      
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePhoto(index)}
+                        className="rounded-full bg-red-500/80 p-1.5 text-white backdrop-blur-sm transition hover:bg-red-500"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
-            <input
-              accept="image/*"
-              className="hidden"
-              multiple
-              type="file"
-              onChange={handlePhotoUpload}
-            />
-          </label>
+          </div>
 
           <button
             className="mt-4 flex h-12 w-full items-center justify-center gap-2  bg-[#7f7db6]  text-sm font-black text-white "

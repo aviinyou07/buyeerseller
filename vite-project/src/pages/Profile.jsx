@@ -311,6 +311,60 @@ const Profile = () => {
     activePopup || isListingsOpen || isOrdersOpen || isSalesOpen,
   );
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    address: "",
+    business_name: "",
+    gst_number: "",
+  });
+  const [isEditLoading, setIsEditLoading] = useState(false);
+  
+  const handleEditClick = async () => {
+    setIsEditing(true);
+    setIsEditLoading(true);
+    try {
+      const response = await getProfileData();
+      const pd = response.profileData || response.data?.profileData || {};
+      const primaryAddress = pd.addresses?.find(a => a.is_default) || pd.addresses?.[0];
+      const businessName = authUser.business_name || pd.sellerDetails?.business_name || "";
+      const gstNumber = authUser.gst_number || pd.sellerDetails?.gst_number || "";
+      
+      setEditFormData({
+        full_name: authUser.fullName || authUser.name || "",
+        email: authUser.email || "",
+        phone: authUser.phone || "",
+        address: primaryAddress?.address_line || "",
+        business_name: businessName,
+        gst_number: gstNumber,
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsEditLoading(false);
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editFormData.full_name || !editFormData.email || !editFormData.phone || !editFormData.address) {
+       alert(translateProfileText("Please fill all mandatory fields (Name, Email, Phone, Address)", language));
+       return;
+    }
+    
+    try {
+      await updateProfileData(editFormData);
+      const updatedUser = { ...authUser, fullName: editFormData.full_name, name: editFormData.full_name, email: editFormData.email, phone: editFormData.phone };
+      setAuthUser(saveCurrentUser(updatedUser));
+      setIsEditing(false);
+      alert(translateProfileText("Profile updated successfully!", language));
+    } catch (e) {
+      alert(translateProfileText("Failed to update profile", language));
+    }
+  };
+
   const displayName = authUser.fullName || authUser.name || "";
   const nameParts = displayName.trim().split(/\s+/).filter(Boolean);
   const profileInitials =
@@ -561,20 +615,32 @@ const Profile = () => {
             </div>
 
             <div className="min-w-0 flex-1 p-2">
-              <h2 className="truncate text-xl font-black tracking-normal">
-                {displayName}
-              </h2>
-              {displayEmail && (
-                <p className="mt-1 truncate text-xs font-semibold text-slate-500">
-                  {displayEmail}
-                </p>
-              )}
-              {displayPhone && (
-                <p className="mt-2 flex min-w-0 items-center gap-1.5 text-xs font-semibold text-slate-500">
-                  <Phone className="size-3.5 shrink-0" />
-                  <span className="truncate">{displayPhone}</span>
-                </p>
-              )}
+              <div className="flex justify-between items-start gap-2">
+                <div className="min-w-0">
+                  <h2 className="truncate text-xl font-black tracking-normal">
+                    {displayName}
+                  </h2>
+                  {displayEmail && (
+                    <p className="mt-1 truncate text-xs font-semibold text-slate-500">
+                      {displayEmail}
+                    </p>
+                  )}
+                  {displayPhone && (
+                    <p className="mt-2 flex min-w-0 items-center gap-1.5 text-xs font-semibold text-slate-500">
+                      <Phone className="size-3.5 shrink-0" />
+                      <span className="truncate">{displayPhone}</span>
+                    </p>
+                  )}
+                </div>
+                {!isEditing && (
+                  <button
+                    onClick={handleEditClick}
+                    className="text-[11px] font-bold text-[#4d49b9] bg-white px-3 py-1.5 rounded-full hover:bg-slate-50 ring-1 ring-[#4d49b9] transition-all shrink-0"
+                  >
+                    Edit Profile
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -593,16 +659,63 @@ const Profile = () => {
 
         
 
-        <SectionCard title="More">
-          <ProfileLanguageToggle />
-          {moreActions.map((item) => (
-            <MenuRow
-              item={item}
-              key={item.label}
-              onClick={() => handleActionClick(item)}
-            />
-          ))}
-        </SectionCard>
+        {isEditing ? (
+          <SectionCard title={translateProfileText("Edit Profile", language)}>
+            {isEditLoading ? (
+              <div className="p-4 text-center text-sm font-semibold text-slate-500">
+                {translateProfileText("Loading...", language)}
+              </div>
+            ) : (
+              <form onSubmit={handleEditSubmit} className="p-4 space-y-4 text-left">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">{translateProfileText("Full Name", language)} *</label>
+                  <input required value={editFormData.full_name} onChange={e => setEditFormData({...editFormData, full_name: e.target.value})} className="w-full border border-slate-200 p-2 text-sm rounded-md" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">{translateProfileText("Email", language)} *</label>
+                  <input type="email" required value={editFormData.email} onChange={e => setEditFormData({...editFormData, email: e.target.value})} className="w-full border border-slate-200 p-2 text-sm rounded-md" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">{translateProfileText("Phone Number", language)} *</label>
+                  <input required value={editFormData.phone} onChange={e => setEditFormData({...editFormData, phone: e.target.value})} className="w-full border border-slate-200 p-2 text-sm rounded-md" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">{translateProfileText("Address", language)} *</label>
+                  <textarea required value={editFormData.address} onChange={e => setEditFormData({...editFormData, address: e.target.value})} className="w-full border border-slate-200 p-2 text-sm rounded-md h-20" />
+                </div>
+                
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">{translateProfileText("Business Name (Optional)", language)}</label>
+                  <input value={editFormData.business_name} onChange={e => setEditFormData({...editFormData, business_name: e.target.value})} className="w-full border border-slate-200 p-2 text-sm rounded-md" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">{translateProfileText("GST Number (Optional)", language)}</label>
+                  <input value={editFormData.gst_number} onChange={e => setEditFormData({...editFormData, gst_number: e.target.value})} className="w-full border border-slate-200 p-2 text-sm rounded-md" />
+                </div>
+                
+                <div className="flex gap-2 pt-2">
+                  <button type="button" onClick={() => setIsEditing(false)} className="flex-1 py-2 text-sm font-bold text-slate-600 bg-slate-100 rounded-md hover:bg-slate-200">
+                    {translateProfileText("Cancel", language)}
+                  </button>
+                  <button type="submit" className="flex-1 py-2 text-sm font-bold text-white bg-[#4d49b9] rounded-md hover:bg-[#3d3a95]">
+                    {translateProfileText("Save Profile", language)}
+                  </button>
+                </div>
+              </form>
+            )}
+          </SectionCard>
+        ) : (
+          <SectionCard title="More">
+            <ProfileLanguageToggle />
+            {moreActions.map((item) => (
+              <MenuRow
+                item={item}
+                key={item.label}
+                onClick={() => handleActionClick(item)}
+              />
+            ))}
+          </SectionCard>
+        )}
       </main>
 
       {activePopup && (

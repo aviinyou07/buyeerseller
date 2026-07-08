@@ -4,7 +4,10 @@ import {
   getUserPaymentMethods,
   getUserBankAccounts,
   getUserKycStatus,
-  getSellerEarnings
+  getSellerEarnings,
+  updateUserProfile,
+  updateUserAddress,
+  updateSellerProfileByUserId
 } from './users.queries.js';
 
 function requireAuth(req, res) {
@@ -49,6 +52,38 @@ export async function getProfileData(req, res) {
     });
   } catch (error) {
     console.error('[users.getProfileData]', error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
+/**
+ * PATCH /api/users/profile-data
+ */
+export async function updateProfileData(req, res) {
+  const user = requireAuth(req, res);
+  if (!user) return;
+
+  const { full_name, email, phone, address, business_name, gst_number } = req.body;
+
+  if (!full_name || !email || !phone || !address) {
+    return res.status(400).json({ success: false, message: 'Full name, email, phone, and address are required.' });
+  }
+
+  try {
+    // Update basic user profile
+    await updateUserProfile(user.id, { full_name, email, phone });
+
+    // Update primary address
+    await updateUserAddress(user.id, address);
+
+    // If seller details are provided, update seller profile
+    if (business_name || gst_number) {
+      await updateSellerProfileByUserId(user.id, { business_name, gst_number });
+    }
+
+    return res.json({ success: true, message: 'Profile updated successfully.' });
+  } catch (error) {
+    console.error('[users.updateProfileData]', error);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 }

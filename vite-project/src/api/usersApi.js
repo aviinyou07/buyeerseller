@@ -5,3 +5,8 @@ export const getProfileData = async () => {
 
   return response.data
 }
+
+export const updateProfileData = async (payload) => {
+  const response = await axiosClient.patch('/users/profile-data', payload)
+  return response.data
+}

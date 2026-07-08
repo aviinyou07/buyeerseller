@@ -479,73 +479,105 @@ const Customers = () => {
     }
   };
 
-  if (selectedCustomer) {
+  const handleVerifySeller = async (sellerProfileId) => {
+    if (!sellerProfileId) return;
+    try {
+      await api.patch(`/customers/sellers/${sellerProfileId}/verify`, { is_verified: true });
+      setSelectedCustomer(prev => ({
+        ...prev,
+        raw: {
+          ...prev.raw,
+          is_verified: true,
+          seller_details: {
+            ...(prev.raw?.seller_details || {}),
+            is_verified: true
+          }
+        }
+      }));
+      setRefreshKey(prev => prev + 1);
+    } catch (err) {
+      alert("Failed to verify seller");
+    }
+  };
+
+  const handleDeleteCustomer = async (id) => {
+    if(!window.confirm("Are you sure you want to completely delete this customer?")) return;
+    try {
+      await api.delete(`/customers/${id}`);
+      setSelectedCustomer(null);
+      setRefreshKey(prev => prev + 1);
+    } catch(err) {
+      alert("Failed to delete customer");
+    }
+  };
+
+  if (selectedCustomer && !isCustomerFormOpen) {
     const isSeller = selectedCustomer.raw?.role === 'Seller' || selectedCustomer.raw?.role === 'Both' || selectedCustomer.raw?.role === 'seller';
     const hasAddress = !!selectedCustomer.raw?.address;
+    const isVerified = selectedCustomer.raw?.is_verified || selectedCustomer.raw?.seller_details?.is_verified;
 
     return (
-      <div className="space-y-6 w-full mx-auto animate-[fadeIn_.2s_ease] text-left p-4 lg:p-6 pb-20">
-        {/* Header with Back button */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 border border-gray-200 rounded-xl shadow-sm">
-          <div className="flex items-center gap-4">
+      <div className="space-y-4 w-full mx-auto animate-[fadeIn_.2s_ease] text-left p-2 pb-20">
+        
+        {/* Unified Profile Header */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          {/* Top Banner */}
+          <div className="h-28 bg-gradient-to-r from-blue-50 to-indigo-50 relative border-b border-gray-100">
             <button
               type="button"
               onClick={() => setSelectedCustomer(null)}
-              className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition shrink-0"
+              className="absolute top-4 left-4 flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-sm border border-gray-200 hover:bg-gray-50 text-gray-700 transition"
+              title="Back to Customers"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={18} />
             </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Customer Profile</h1>
-              <p className="text-sm text-gray-500 mt-0.5">Manage customer account, view orders, and history.</p>
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm border ${
+                  selectedCustomer.status === 'Active'
+                    ? 'text-green-800 bg-green-100 border-green-200'
+                    : selectedCustomer.status === 'Blocked'
+                      ? 'text-red-800 bg-red-100 border-red-200'
+                      : 'text-gray-800 bg-gray-100 border-gray-200'
+                }`}
+              >
+                {selectedCustomer.status}
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-             <span
-              className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                selectedCustomer.status === 'Active'
-                  ? 'text-green-700 bg-green-100 border border-green-200'
-                  : selectedCustomer.status === 'Blocked'
-                    ? 'text-red-700 bg-red-100 border border-red-200'
-                    : 'text-gray-700 bg-gray-100 border border-gray-200'
-              }`}
-            >
-              {selectedCustomer.status}
-            </span>
-          </div>
-        </div>
 
-        {/* Top Profile Card */}
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 lg:p-8 flex flex-col md:flex-row gap-8 items-start md:items-center">
-          <div
-            className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center text-4xl sm:text-5xl font-bold border-4 border-white shadow-md shrink-0 ${selectedCustomer.avatarBg} ${selectedCustomer.avatarText}`}
-          >
-            {selectedCustomer.initials}
-          </div>
-          <div className="flex-1 space-y-3">
-            <div>
-              <h2 className="text-3xl font-extrabold text-gray-900">{selectedCustomer.name}</h2>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-blue-600 font-medium">{selectedCustomer.handle}</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-                <span className="text-gray-500 font-medium flex items-center gap-1">
-                  {isSeller ? <Store size={14} className="text-orange-500" /> : <Users size={14} className="text-blue-500" />}
-                  {isSeller ? 'Seller Account' : 'Buyer Account'}
-                </span>
+          <div className="px-5 lg:px-8 pb-5 relative">
+            <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-end -mt-12 mb-5">
+              <div
+                className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-3xl sm:text-4xl font-extrabold border-4 border-white shadow-md shrink-0 ${selectedCustomer.avatarBg} ${selectedCustomer.avatarText}`}
+              >
+                {selectedCustomer.initials}
+              </div>
+              <div className="flex-1 pb-1">
+                <h2 className="text-2xl font-extrabold text-gray-900 leading-tight">{selectedCustomer.name}</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-blue-600 font-medium text-sm">{selectedCustomer.handle}</span>
+                  <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                  <span className="text-gray-500 font-medium text-sm flex items-center gap-1.5">
+                    {isSeller ? <Store size={14} className="text-orange-500" /> : <Users size={14} className="text-blue-500" />}
+                    {isSeller ? 'Seller Account' : 'Buyer Account'}
+                  </span>
+                </div>
               </div>
             </div>
-            
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 pt-2">
+
+            {/* Info Badges */}
+            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
               <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                <Mail size={16} className="text-gray-400" />
+                <Mail size={15} className="text-gray-400" />
                 <span className="font-medium">{selectedCustomer.email || "No Email provided"}</span>
               </div>
               <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                <Phone size={16} className="text-gray-400" />
+                <Phone size={15} className="text-gray-400" />
                 <span className="font-medium">{selectedCustomer.phone || "No Phone provided"}</span>
               </div>
               <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                <Calendar size={16} className="text-gray-400" />
+                <Calendar size={15} className="text-gray-400" />
                 <span className="font-medium">Joined {selectedCustomer.joinedDate || "N/A"}</span>
               </div>
             </div>
@@ -553,91 +585,110 @@ const Customers = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-5 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-semibold text-blue-800">Total Orders</span>
-              <ShoppingBag size={20} className="text-blue-500" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="bg-gradient-to-br from-[#f5f7ff] via-[#eef2ff] to-[#e0e7ff] rounded-xl border border-white/60 p-4 shadow-sm flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Orders</span>
+              <ShoppingBag size={18} className="text-[#4f6bff]" />
             </div>
-            <h4 className="text-3xl font-extrabold text-blue-900">{selectedCustomer.totalOrders}</h4>
+            <h4 className="text-3xl font-extrabold text-gray-900">{selectedCustomer.totalOrders}</h4>
           </div>
-          <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-5 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-semibold text-green-800">{isSeller ? 'Total Revenue' : 'Total Spent'}</span>
-              <CreditCard size={20} className="text-green-500" />
+          <div className="bg-gradient-to-br from-[#f1fff7] via-[#e8fff1] to-[#dff7e8] rounded-xl border border-white/60 p-4 shadow-sm flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{isSeller ? 'Total Revenue' : 'Total Spent'}</span>
+              <CreditCard size={18} className="text-green-600" />
             </div>
-            <h4 className="text-3xl font-extrabold text-green-900">{selectedCustomer.totalSpent || "$0.00"}</h4>
+            <h4 className="text-3xl font-extrabold text-gray-900">{selectedCustomer.totalSpent || "$0.00"}</h4>
           </div>
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-5 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-semibold text-purple-800">Role Level</span>
-              <Shield size={20} className="text-purple-500" />
+          <div className="bg-gradient-to-br from-[#f5fafe] via-[#f1f8ff] to-[#e6f3ff] rounded-xl border border-white/60 p-4 shadow-sm flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Role Level</span>
+              <Shield size={18} className="text-blue-500" />
             </div>
-            <h4 className="text-3xl font-extrabold text-purple-900 capitalize">{selectedCustomer.raw?.role || 'User'}</h4>
+            <h4 className="text-2xl font-extrabold text-gray-900 capitalize">{selectedCustomer.raw?.role || 'User'}</h4>
           </div>
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-5 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-semibold text-orange-800">Verification</span>
-              <CheckCircle2 size={20} className="text-orange-500" />
+          <div className="bg-gradient-to-br from-[#fff5f5] via-[#ffeded] to-[#ffe4e4] rounded-xl border border-white/60 p-4 shadow-sm flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Verification</span>
+              <CheckCircle2 size={18} className="text-red-500" />
             </div>
-            <h4 className="text-lg font-bold text-orange-900 mt-2">{selectedCustomer.raw?.is_verified ? 'Verified' : 'Unverified'}</h4>
+            <h4 className="text-xl font-extrabold text-gray-900 mt-1">{isVerified ? 'Verified' : 'Unverified'}</h4>
           </div>
         </div>
 
         {/* Detailed Information Tabs / Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-3 flex items-center gap-2">
-                <MapPin size={18} className="text-gray-400" /> Address Details
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+          <div className="lg:col-span-2 space-y-2">
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+              <h3 className="text-[15px] font-bold text-gray-900 mb-3 border-b border-gray-100 pb-2 flex items-center gap-2">
+                <MapPin size={16} className="text-gray-400" /> Address Details
               </h3>
               {hasAddress ? (
-                <div className="space-y-2 text-gray-700">
+                <div className="space-y-2 text-gray-700 text-sm">
                   <p className="font-medium text-gray-900 whitespace-pre-wrap">{selectedCustomer.raw?.address}</p>
                 </div>
               ) : (
-                <div className="py-6 text-center text-gray-500 italic bg-gray-50 rounded-lg border border-dashed border-gray-200">No address provided by the user.</div>
+                <div className="py-4 text-center text-sm text-gray-500 italic bg-gray-50 rounded-lg border border-dashed border-gray-200">No address provided by the user.</div>
               )}
             </div>
             
             {isSeller && (
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-3 flex items-center gap-2">
-                  <Store size={18} className="text-gray-400" /> Seller Information
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+                <h3 className="text-[15px] font-bold text-gray-900 mb-3 border-b border-gray-100 pb-2 flex items-center gap-2">
+                  <Store size={16} className="text-gray-400" /> Seller Information
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <span className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Business Name</span>
-                    <span className="font-semibold text-gray-900 text-base">{selectedCustomer.raw?.business_name || selectedCustomer.raw?.seller_details?.business_name || 'N/A'}</span>
+                    <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">Business Name</span>
+                    <span className="font-semibold text-gray-900 text-[14px]">{selectedCustomer.raw?.business_name || selectedCustomer.raw?.seller_details?.business_name || 'N/A'}</span>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <span className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">GST Number</span>
-                    <span className="font-semibold text-gray-900 text-base">{selectedCustomer.raw?.gst_number || selectedCustomer.raw?.seller_details?.gst_number || 'N/A'}</span>
+                    <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">GST Number</span>
+                    <span className="font-semibold text-gray-900 text-[14px]">{selectedCustomer.raw?.gst_number || selectedCustomer.raw?.seller_details?.gst_number || 'N/A'}</span>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <span className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Total Listings</span>
-                    <span className="font-semibold text-gray-900 text-base">{selectedCustomer.raw?.seller_details?.total_listings || 0}</span>
+                    <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">Total Listings</span>
+                    <span className="font-semibold text-gray-900 text-[14px]">{selectedCustomer.raw?.seller_details?.total_listings || 0}</span>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <span className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Seller Profile ID</span>
-                    <span className="font-semibold text-gray-900 text-base">{selectedCustomer.raw?.seller_profile_id || 'N/A'}</span>
+                    <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">Seller Profile ID</span>
+                    <span className="font-semibold text-gray-900 text-[14px]">{selectedCustomer.raw?.seller_profile_id || 'N/A'}</span>
                   </div>
                 </div>
               </div>
             )}
           </div>
           
-          <div className="space-y-6">
-             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-3 flex items-center gap-2">
-                  <Shield size={18} className="text-gray-400" /> Quick Actions
+          <div className="space-y-2">
+             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+                <h3 className="text-[15px] font-bold text-gray-900 mb-3 border-b border-gray-100 pb-2 flex items-center gap-2">
+                  <Shield size={16} className="text-gray-400" /> Quick Actions
                 </h3>
-                <div className="space-y-3">
+                <div className="flex flex-col gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => openCustomerForm("edit", selectedCustomer)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition font-semibold shadow-sm"
+                  >
+                    Edit Profile
+                  </button>
+
+                  {isSeller && !isVerified && selectedCustomer.raw?.seller_profile_id && (
+                    <button
+                      type="button"
+                      onClick={() => handleVerifySeller(selectedCustomer.raw.seller_profile_id)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition font-semibold shadow-sm"
+                    >
+                      <CheckCircle2 size={16} />
+                      Verify Seller
+                    </button>
+                  )}
+
                   {selectedCustomer.status !== "Blocked" ? (
                     <button
                       type="button"
                       onClick={() => toggleBlockStatus(selectedCustomer.id)}
-                      className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition font-semibold shadow-sm"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition font-semibold shadow-sm"
                     >
                       <Ban size={16} />
                       Suspend Customer
@@ -646,7 +697,7 @@ const Customers = () => {
                     <button
                       type="button"
                       onClick={() => toggleBlockStatus(selectedCustomer.id)}
-                      className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl transition font-semibold shadow-sm"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition font-semibold shadow-sm"
                     >
                       <CheckCircle2 size={16} />
                       Unblock Customer
@@ -655,12 +706,11 @@ const Customers = () => {
                   
                   <button
                     type="button"
-                    onClick={() => {
-                        openCustomerForm("edit", selectedCustomer);
-                    }}
-                    className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition font-semibold shadow-sm"
+                    onClick={() => handleDeleteCustomer(selectedCustomer.id)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition font-semibold shadow-sm"
                   >
-                    Edit Profile
+                    <X size={16} />
+                    Delete Customer
                   </button>
                 </div>
              </div>

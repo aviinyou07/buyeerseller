@@ -72,3 +72,63 @@ export async function getSellerEarnings(userId) {
     platformFee
   };
 }
+
+/**
+ * Update user details (name, email, phone)
+ */
+export async function updateUserProfile(userId, { full_name, email, phone }) {
+  const [result] = await pool.query(
+    'UPDATE users SET full_name = ?, email = ?, phone = ? WHERE id = ?',
+    [full_name, email, phone, userId]
+  );
+  return result.affectedRows > 0;
+}
+
+/**
+ * Update or insert default user address
+ */
+export async function updateUserAddress(userId, address) {
+  // Check if default address exists
+  const [existing] = await pool.query(
+    'SELECT id FROM user_addresses WHERE user_id = ? AND is_default = 1 LIMIT 1',
+    [userId]
+  );
+
+  if (existing.length > 0) {
+    await pool.query(
+      'UPDATE user_addresses SET address_line = ? WHERE id = ?',
+      [address, existing[0].id]
+    );
+  } else {
+    // Insert new default address
+    await pool.query(
+      'INSERT INTO user_addresses (user_id, title, address_line, is_default) VALUES (?, ?, ?, 1)',
+      [userId, 'Default Address', address]
+    );
+  }
+}
+
+/**
+ * Update seller profile business details
+ */
+export async function updateSellerProfileByUserId(userId, { business_name, gst_number }) {
+  // Find seller profile ID from users
+  const [user] = await pool.query('SELECT seller_profile_id FROM users WHERE id = ? LIMIT 1', [userId]);
+  if (user.length > 0) {
+    if (user[0].seller_profile_id) {
+      await pool.query(
+        'UPDATE seller_profiles SET business_name = ?, gst_number = ? WHERE id = ?',
+        [business_name, gst_number, user[0].seller_profile_id]
+      );
+    } else if (business_name || gst_number) {
+      const [insertResult] = await pool.query(
+        'INSERT INTO seller_profiles (user_id, business_name, gst_number, is_verified) VALUES (?, ?, ?, 0)',
+        [userId, business_name, gst_number]
+      );
+      await pool.query(
+        'UPDATE users SET seller_profile_id = ? WHERE id = ?',
+        [insertResult.insertId, userId]
+      );
+    }
+  }
+}

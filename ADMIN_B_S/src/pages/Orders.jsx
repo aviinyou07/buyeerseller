@@ -69,7 +69,7 @@ const ProductImage = ({ product }) => (
 
 const ProductInsightsSkeleton = () => (
   <div className="space-y-5">
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
       {[1, 2, 3, 4].map((item) => (
         <div
           className="rounded-lg border border-gray-100 bg-white p-4"
@@ -200,35 +200,8 @@ const Orders = () => {
   };
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-sm font-semibold text-blue-600">
-            <BarChart3 size={18} />
-            Product Insights
-          </div>
-          <h1 className="mt-1 text-2xl font-bold text-gray-900">
-            Interest & Engagement
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Track seller product views, likes, reviews, ratings, and interested buyers.
-          </p>
-        </div>
+    <div className="space-y-4">
 
-        <div className="relative w-full md:w-[300px]">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            placeholder="Search listings..."
-            type="text"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
-        </div>
-      </div>
 
       {loading ? (
         <ProductInsightsSkeleton />
@@ -251,11 +224,11 @@ const Orders = () => {
         </section>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
             {summaryCards.map((item) => (
               <div
                 key={item.key}
-                className={`${item.cardBg} flex items-center justify-between rounded-lg border border-white/60 p-4 shadow-sm`}
+                className={`${item.cardBg} flex items-center justify-between rounded-lg border border-white/60 p-2 shadow-sm`}
               >
                 <div>
                   <h3 className="text-[12px] sm:text-sm font-semibold text-gray-600">
@@ -275,7 +248,7 @@ const Orders = () => {
           </div>
 
           <div className="overflow-hidden rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm">
-            <div className="flex flex-col gap-1 border-b border-gray-100 px-5 py-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-3 border-b border-gray-100 px-5 py-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h2 className="text-[18px] font-semibold text-[#111827]">
                   Product-wise Stats
@@ -284,9 +257,24 @@ const Orders = () => {
                   Engagement details for listed seller listings.
                 </p>
               </div>
-              <span className="text-sm font-semibold text-gray-500">
-                {filteredlistings.length} listings
-              </span>
+              <div className="flex items-center gap-4">
+                <span className="hidden sm:inline-block text-sm font-semibold text-gray-500 whitespace-nowrap">
+                  {filteredlistings.length} listings
+                </span>
+                <div className="relative w-full md:w-[300px]">
+                  <Search
+                    size={16}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  />
+                  <input
+                    className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-4 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    placeholder="Search listings..."
+                    type="text"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="hidden overflow-x-auto lg:block">

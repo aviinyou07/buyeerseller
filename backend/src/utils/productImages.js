@@ -2,9 +2,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
 
-const THUMBNAIL_WIDTH = 420;
-const THUMBNAIL_HEIGHT = 315;
-const THUMBNAIL_QUALITY = 72;
+const THUMBNAIL_WIDTH = 1280;
+const THUMBNAIL_HEIGHT = 960;
+const THUMBNAIL_QUALITY = 95;
 
 const toUploadUrl = (filePath) => {
   const relativePath = path.relative(process.cwd(), filePath).split(path.sep).join('/');

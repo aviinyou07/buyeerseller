@@ -1249,13 +1249,13 @@ const AllListings = () => {
   }
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-4">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2">
         {stats.map((item) => (
           <div
             key={item.id}
-            className={`${item.cardBg} rounded-xl border border-white/60 p-4 shadow-sm hover:shadow-md transition-shadow`}
+            className={`${item.cardBg} rounded-xl border border-white/60 p-2 shadow-sm hover:shadow-md transition-shadow`}
           >
             <div className="flex flex-col">
               <h3 className="text-sm font-medium text-gray-500 mb-2">

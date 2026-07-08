@@ -28,16 +28,6 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobileMenuOpen, setIsMobileMenuO
       path: "/",
     },
     {
-      title: "Buyers",
-      icon: Users,
-      path: "/buyers",
-    },
-    {
-      title: "Sellers",
-      icon: UserRound,
-      path: "/sellers",
-    },
-    {
       title: "Customers",
       icon: Contact,
       path: "/customers",
@@ -163,7 +153,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, isMobileMenuOpen, setIsMobileMenuO
           <div className="px-3 py-2 space-y-2">
             {menuItems.map((item, index) => {
               // Hide these items on mobile because they are in BottomNav
-              const isBottomNavItem = ["/", "/buyers", "/sellers", "/customers", "/categories"].includes(item.path);
+              const isBottomNavItem = ["/", "/customers", "/categories"].includes(item.path);
               
               return (
                 <NavLink

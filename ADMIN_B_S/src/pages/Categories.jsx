@@ -460,11 +460,11 @@ const Categories = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       
       {/* Upper Stats Card Container */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
-        <div className="bg-gradient-to-br from-[#f5f7ff] via-[#eef2ff] to-[#e0e7ff] rounded-lg border border-white/60 p-4 flex items-center justify-between shadow-sm">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <div className="bg-gradient-to-br from-[#f5f7ff] via-[#eef2ff] to-[#e0e7ff] rounded-lg border border-white/60 p-2 flex items-center justify-between shadow-sm">
           <div>
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Total Categories</h3>
             <h1 className="text-3xl font-extrabold text-gray-900 mt-1">{totalCats}</h1>
@@ -474,7 +474,7 @@ const Categories = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-[#f1fff7] via-[#e8fff1] to-[#dff7e8] rounded-lg border border-white/60 p-4 flex items-center justify-between shadow-sm">
+        <div className="bg-gradient-to-br from-[#f1fff7] via-[#e8fff1] to-[#dff7e8] rounded-lg border border-white/60 p-2 flex items-center justify-between shadow-sm">
           <div>
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Total Subcategories</h3>
             <h1 className="text-3xl font-extrabold text-gray-900 mt-1">{totalSubs}</h1>
@@ -484,7 +484,7 @@ const Categories = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-[#f5fafe] via-[#f1f8ff] to-[#e6f3ff] rounded-lg border border-white/60 p-4 flex items-center justify-between shadow-sm">
+        <div className="bg-gradient-to-br from-[#f5fcff] via-[#eff9ff] to-[#e6f4ff] rounded-lg border border-white/60 p-2 flex items-center justify-between shadow-sm">
           <div>
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Active Categories</h3>
             <h1 className="text-3xl font-extrabold text-gray-900 mt-1">{activeCats}</h1>
@@ -496,7 +496,7 @@ const Categories = () => {
       </div>
 
       {/* Main Board Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
         
         {/* Left Side: Category list */}
         <div className="lg:col-span-5 bg-white border border-gray-200 shadow-sm flex flex-col rounded-xl overflow-hidden">

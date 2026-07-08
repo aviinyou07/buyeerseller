@@ -354,13 +354,13 @@ const Approvals = () => {
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
         {stats.map((item) => (
           <div
             key={item.id}
-            className={`${item.cardBg} rounded-lg border border-white/60 p-3 shadow-sm flex flex-col justify-between`}
+            className={`${item.cardBg} rounded-xl border border-white/60 p-2 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-200`}
           >
             <h3 className="text-[14px] text-gray-600">{item.title}</h3>
 
@@ -382,7 +382,7 @@ const Approvals = () => {
       {/* Main Content */}
       <div className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
         {/* Tabs */}
-        <div className="flex items-center gap-6 px-5 border-b border-gray-100 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+        <div className="flex items-center gap-2 px-5 border-b border-gray-100 overflow-x-auto [&::-webkit-scrollbar]:hidden">
           {["All", "Listing", "Seller", "Buyer"].map((tab) => {
             let label = "";
 

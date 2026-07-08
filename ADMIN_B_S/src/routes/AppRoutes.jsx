@@ -3,8 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout";
 
 import Dashboard from "../pages/Dashboard";
-import Buyers from "../pages/Buyers";
-import Sellers from "../pages/Sellers";
 import Customers from "../pages/Customers";
 import AllListings from "../pages/AllListings";
 import Schemes from "../pages/Schemes";
@@ -29,8 +27,6 @@ const AppRoutes = () => {
         <Route element={<AuthGuard />}>
           <Route path="/" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
-            <Route path="buyers" element={<Buyers />} />
-            <Route path="sellers" element={<Sellers />} />
             <Route path="customers" element={<Customers />} />
             <Route path="categories" element={<Categories />} />
             <Route path="forms" element={<Forms />} />

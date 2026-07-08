@@ -7,8 +7,6 @@ const BottomNav = () => {
 
   const navItems = [
     { title: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { title: "Buyers", icon: Users, path: "/buyers" },
-    { title: "Sellers", icon: UserRound, path: "/sellers" },
     { title: "Customers", icon: Contact, path: "/customers" },
     { title: "Categories", icon: Folder, path: "/categories" },
   ];

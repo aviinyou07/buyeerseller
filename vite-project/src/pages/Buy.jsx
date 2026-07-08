@@ -128,11 +128,11 @@ const CategoryCard = ({ category, item, onClick }) => {
       onClick={() => onClick(category, item)}
       className="group flex flex-col items-center justify-start gap-2 p-1 text-center transition active:scale-[0.98]"
     >
-      <div className="flex w-full aspect-square items-center justify-center text-[#0b87b8]">
+      <div className="flex w-full aspect-square items-center justify-center text-[#0b87b8] overflow-hidden rounded-sm bg-slate-50 ring-1 ring-slate-100">
         {item.image ? (
           <img
             alt={item.name}
-            className="h-full w-full object-contain drop-shadow-sm"
+            className="h-full w-full object-cover"
             src={item.image}
           />
         ) : (

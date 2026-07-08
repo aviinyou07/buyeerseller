@@ -399,7 +399,7 @@ const Schemes = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Department / Ministry</label>
                 <input 
@@ -462,7 +462,7 @@ const Schemes = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Start Date</label>
                 <input 
@@ -507,9 +507,9 @@ const Schemes = () => {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         {stats.map((item) => (
           <div
             key={item.id}

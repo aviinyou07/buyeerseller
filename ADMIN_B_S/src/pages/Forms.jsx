@@ -242,11 +242,11 @@ const Forms = () => {
   }, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       
       {/* Upper Stats Card Container */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 xl:gap-5">
-        <div className="bg-white rounded-xl border border-blue-100/80 p-5 flex items-center justify-between shadow-sm shadow-blue-50/70 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <div className="bg-white rounded-xl border border-blue-100/80 p-2 flex items-center justify-between shadow-sm shadow-blue-50/70 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
           <div>
             <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Business Domains</h3>
             <h1 className="text-3xl font-extrabold text-gray-900 mt-2 leading-none">{categoriesCount}</h1>
@@ -256,7 +256,7 @@ const Forms = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-emerald-100/80 p-5 flex items-center justify-between shadow-sm shadow-emerald-50/70 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+        <div className="bg-white rounded-xl border border-emerald-100/80 p-2 flex items-center justify-between shadow-sm shadow-emerald-50/70 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
           <div>
             <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Active Category Selection</h3>
             <h1 className="text-base font-extrabold text-emerald-700 mt-2 truncate max-w-[220px]" title={selectedCatName}>
@@ -268,7 +268,7 @@ const Forms = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-sky-100/80 p-5 flex items-center justify-between shadow-sm shadow-sky-50/70 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+        <div className="bg-white rounded-xl border border-sky-100/80 p-2 flex items-center justify-between shadow-sm shadow-sky-50/70 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
           <div>
             <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Configure Mode</h3>
             <h1 className="text-2xl font-extrabold text-blue-600 mt-2 leading-none">
@@ -282,7 +282,7 @@ const Forms = () => {
       </div>
 
       {/* Main Board Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
         
         {/* Left Side: Category tree navigation */}
         <div className="lg:col-span-4 bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden flex flex-col">

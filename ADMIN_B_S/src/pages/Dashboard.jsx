@@ -167,22 +167,16 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* ====================================================== */}
       {/* Stats Cards */}
       {/* ====================================================== */}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         {stats.map((item) => (
           <div
             key={item.id}
-            className={`
-  ${item.cardBg}
-  rounded-lg
-  border
-  border-white/60
-  p-2
-`}
+            className={`${item.cardBg} rounded-xl border border-white/60 p-2 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-200`}
           >
             <div className="flex items-start justify-between">
               <div>

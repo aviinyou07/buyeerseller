@@ -184,9 +184,9 @@ export async function getProductById(id) {
        cat.title AS category_name,
        sub.slug  AS subcategory_id,
        sub.name  AS subcategory_name,
-       u.name    AS seller_name,
+       u.full_name AS seller_name,
        u.phone   AS seller_phone,
-       u.rating  AS seller_rating,
+       (SELECT AVG(lr.rating) FROM listing_reviews lr JOIN listings l2 ON l2.id = lr.listing_id WHERE l2.seller_id = p.seller_id) AS seller_rating,
        (SELECT COUNT(*) FROM listing_likes ll WHERE ll.listing_id = p.id) AS likes_count,
        (SELECT COUNT(*) FROM listing_reviews lr WHERE lr.listing_id = p.id) AS reviews_count,
        (SELECT AVG(lr.rating) FROM listing_reviews lr WHERE lr.listing_id = p.id) AS avg_rating

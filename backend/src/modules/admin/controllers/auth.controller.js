@@ -91,7 +91,80 @@ const getMe = async (req, res) => {
   }
 };
 
+/**
+ * Update Admin Profile
+ * PUT /api/v1/admin/auth/profile
+ */
+const updateProfile = async (req, res) => {
+  const { full_name, email } = req.body;
+  const adminId = req.user.id;
+
+  if (!full_name || !email) {
+    return error(res, 'Please provide full_name and email', 400);
+  }
+
+  try {
+    await User.updateProfile(adminId, { full_name, email });
+    const updatedUser = await User.findById(adminId);
+    
+    return success(res, 'Profile updated successfully', {
+      admin: {
+        id: updatedUser.id,
+        uuid: updatedUser.uuid,
+        full_name: updatedUser.full_name,
+        phone: updatedUser.phone,
+        email: updatedUser.email,
+        role: updatedUser.role,
+      }
+    });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    return error(res, 'Failed to update profile', 500);
+  }
+};
+
+/**
+ * Update Admin Password
+ * PUT /api/v1/admin/auth/password
+ */
+const updatePassword = async (req, res) => {
+  const { current_password, new_password } = req.body;
+  const adminId = req.user.id;
+
+  if (!current_password || !new_password) {
+    return error(res, 'Please provide current_password and new_password', 400);
+  }
+  
+  if (new_password.length < 8) {
+    return error(res, 'New password must be at least 8 characters long', 400);
+  }
+
+  try {
+    const user = await User.findById(adminId);
+    if (!user) {
+      return error(res, 'User not found', 404);
+    }
+
+    const isMatch = await bcrypt.compare(current_password, user.password_hash);
+    if (!isMatch) {
+      return error(res, 'Incorrect current password', 400);
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(new_password, salt);
+
+    await User.updatePassword(adminId, hashedPassword);
+    
+    return success(res, 'Password updated successfully');
+  } catch (err) {
+    console.error('Update password error:', err);
+    return error(res, 'Failed to update password', 500);
+  }
+};
+
 module.exports = {
   login,
-  getMe
+  getMe,
+  updateProfile,
+  updatePassword
 };

@@ -288,12 +288,15 @@ const Orders = () => {
                     <th className="px-5 py-3 font-semibold">Reviews</th>
                     <th className="px-5 py-3 font-semibold">Rating</th>
                     <th className="px-5 py-3 font-semibold">Interested</th>
-                    <th className="px-5 py-3 font-semibold">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {filteredlistings.map((product) => (
-                    <tr key={product.productId} className="hover:bg-gray-50/60">
+                    <tr 
+                      key={product.productId} 
+                      className="hover:bg-gray-50/60 cursor-pointer"
+                      onClick={() => handleViewInterestedUsers(product)}
+                    >
                       <td className="px-5 py-4">
                         <div className="flex min-w-0 items-center gap-3">
                           <ProductImage product={product} />
@@ -322,15 +325,6 @@ const Orders = () => {
                       </td>
                       <td className="px-5 py-4 text-sm font-semibold text-gray-700">
                         {formatNumber(product.interestedCount)}
-                      </td>
-                      <td className="px-5 py-4">
-                        <button
-                          className="rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
-                          type="button"
-                          onClick={() => handleViewInterestedUsers(product)}
-                        >
-                          View Interested Users
-                        </button>
                       </td>
                     </tr>
                   ))}
@@ -374,14 +368,6 @@ const Orders = () => {
                       Interested: {formatNumber(product.interestedCount)}
                     </span>
                   </div>
-
-                  <button
-                    className="mt-4 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
-                    type="button"
-                    onClick={() => handleViewInterestedUsers(product)}
-                  >
-                    View Interested Users
-                  </button>
                 </article>
               ))}
             </div>

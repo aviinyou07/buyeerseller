@@ -222,7 +222,7 @@ class Listing {
               c.id AS category_id, c.name AS category_name,
               sc.name AS subcategory_name,
               sp.id AS seller_id, sp.business_name, sp.gst_number, sp.is_verified,
-              u.id AS user_id, u.full_name AS seller_name, u.phone AS seller_phone
+              u.id AS user_id, u.full_name AS seller_name, u.phone AS seller_phone, u.email AS seller_email
        FROM listings l
        LEFT JOIN admin_categories c ON l.category_id = c.id
        LEFT JOIN admin_categories sc ON l.subcategory_id = sc.id

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { useConfirm } from '../contexts/ConfirmContext';
 import { 
   Folder, 
   FolderPlus, 
@@ -19,6 +21,7 @@ import {
 import { api } from '../utils/api';
 
 const Categories = () => {
+  const confirm = useConfirm();
   const [categoriesTree, setCategoriesTree] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -65,7 +68,7 @@ const Categories = () => {
       }
     } catch (err) {
       console.error('Failed to load categories', err);
-      setError('Failed to fetch categories list.');
+      toast.error('Failed to fetch categories list.');
     } finally {
       setLoading(false);
     }
@@ -114,6 +117,7 @@ const Categories = () => {
         const res = await api.post('/categories', payload);
         if (res && res.success && res.data) {
           setSelectedCatId(res.data.id);
+          toast.success('Category created successfully');
         }
       } else {
         const payload = {
@@ -122,18 +126,20 @@ const Categories = () => {
           accent: categoryFormData.accent
         };
         await api.put(`/categories/${categoryFormData.id}`, payload);
+        toast.success('Category updated successfully');
       }
       setIsCategoryModalOpen(false);
       loadCategories();
     } catch (err) {
-      alert(err.message || 'Operation failed');
+      toast.error(err.message || 'Operation failed');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteCategory = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete category "${name}"? All subcategories, listings, forms, and schemes associated with it will be deleted permanently.`)) {
+    const confirmed = await confirm(`Are you sure you want to delete category "${name}"? All subcategories, listings, forms, and schemes associated with it will be deleted permanently.`);
+    if (!confirmed) {
       return;
     }
     try {
@@ -141,8 +147,9 @@ const Categories = () => {
       await api.delete(`/categories/${id}`);
       if (selectedCatId === id) setSelectedCatId(null);
       loadCategories();
+      toast.success('Category deleted successfully');
     } catch (err) {
-      alert(err.message || 'Failed to delete category.');
+      toast.error(err.message || 'Failed to delete category.');
     } finally {
       setLoading(false);
     }
@@ -152,8 +159,9 @@ const Categories = () => {
     try {
       await api.patch(`/categories/${id}/toggle`, {});
       loadCategories();
+      toast.success('Category status toggled successfully');
     } catch (err) {
-      alert(err.message || 'Failed to toggle status');
+      toast.error(err.message || 'Failed to toggle status');
     }
   };
 
@@ -209,8 +217,10 @@ const Categories = () => {
 
       if (subcategoryModalMode === 'add') {
         await api.post('/categories', formData);
+        toast.success('Subcategory created successfully');
       } else {
         await api.put(`/categories/${subcategoryFormData.id}`, formData);
+        toast.success('Subcategory updated successfully');
       }
 
       setIsSubcategoryModalOpen(false);
@@ -221,22 +231,24 @@ const Categories = () => {
       setSelectedCatId(parentId);
       loadCategories();
     } catch (err) {
-      alert(err.message || 'Operation failed');
+      toast.error(err.message || 'Operation failed');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteSubcategory = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete subcategory "${name}"?`)) {
+    const confirmed = await confirm(`Are you sure you want to delete subcategory "${name}"?`);
+    if (!confirmed) {
       return;
     }
     try {
       setLoading(true);
       await api.delete(`/categories/${id}`);
       loadCategories();
+      toast.success('Subcategory deleted successfully');
     } catch (err) {
-      alert(err.message || 'Failed to delete subcategory');
+      toast.error(err.message || 'Failed to delete subcategory');
     } finally {
       setLoading(false);
     }

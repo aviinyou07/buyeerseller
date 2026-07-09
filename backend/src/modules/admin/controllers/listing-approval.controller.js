@@ -146,13 +146,15 @@ const getApprovalDetails = async (req, res) => {
       condition: condition,
       warranty: warranty,
       used_for: usedFor,
+      brand: listing.brand,
+      location: listing.location,
       category: { id: listing.category_id, name: listing.category_name },
       seller: { 
         id: listing.seller_id, 
         business_name: listing.business_name, 
         gst_number: listing.gst_number, 
         is_verified: listing.is_verified === 1 || listing.is_verified === true,
-        user: { id: listing.user_id, full_name: listing.seller_name, phone: listing.seller_phone } 
+        user: { id: listing.user_id, full_name: listing.seller_name, phone: listing.seller_phone, email: listing.seller_email } 
       },
       images,
       custom_attributes: combinedCustomAttributes,

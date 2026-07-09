@@ -1,12 +1,32 @@
-import React from "react";
-import { useLocation, Link } from "react-router-dom";
-import { UserCircle2, ChevronRight, Menu } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { useLocation, Link, useNavigate } from "react-router-dom";
+import { UserCircle2, ChevronRight, Menu, LogOut, User } from "lucide-react";
 import { api } from "../utils/api";
 
 const Header = ({ setIsMobileMenuOpen }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const pathnames = location.pathname.split("/").filter((x) => x);
   const profile = api.getProfile();
+  
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    api.logout();
+    navigate("/login");
+  };
 
   // Helper formatting utility to capitalize links cleanly (e.g. all-listings -> All Listings)
   const formatBreadcrumb = (string) => {
@@ -77,9 +97,12 @@ const Header = ({ setIsMobileMenuOpen }) => {
       </div>
 
       {/* Right: Profile Actions Panel */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 relative" ref={profileRef}>
         {/* User Block info */}
-        <div className="flex items-center gap-2.5 px-2 py-1.5 hover:bg-gray-50 rounded-lg transition-all cursor-pointer group">
+        <div 
+          onClick={() => setIsProfileOpen(!isProfileOpen)}
+          className="flex items-center gap-2.5 px-2 py-1.5 hover:bg-gray-50 rounded-lg transition-all cursor-pointer group select-none"
+        >
           <UserCircle2 size={26} className="text-gray-500 group-hover:text-blue-600 transition-colors" />
           <div className="hidden sm:flex flex-col text-left">
             <span className="font-semibold text-xs text-gray-800 leading-tight">
@@ -90,6 +113,35 @@ const Header = ({ setIsMobileMenuOpen }) => {
             </span>
           </div>
         </div>
+
+        {/* Dropdown Menu */}
+        {isProfileOpen && (
+          <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="px-4 py-2 border-b border-gray-50 sm:hidden">
+              <p className="text-sm font-semibold text-gray-800 truncate">{profile?.full_name || "Admin User"}</p>
+              <p className="text-xs text-gray-500 truncate">{profile?.email || "admin@example.com"}</p>
+            </div>
+            
+            <button
+              onClick={() => {
+                setIsProfileOpen(false);
+                navigate('/settings');
+              }}
+              className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+            >
+              <User size={16} className="text-gray-400" />
+              Profile
+            </button>
+            
+            <button
+              onClick={handleLogout}
+              className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors font-medium"
+            >
+              <LogOut size={16} className="text-red-400" />
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

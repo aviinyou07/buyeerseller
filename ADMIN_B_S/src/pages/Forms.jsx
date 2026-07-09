@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { useConfirm } from '../contexts/ConfirmContext';
 import { 
   Folder, 
   FolderPlus, 
@@ -21,6 +23,7 @@ import {
 import { api } from '../utils/api';
 
 const Forms = () => {
+  const confirm = useConfirm();
   const [categoriesTree, setCategoriesTree] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -156,19 +159,18 @@ const Forms = () => {
   const handleSaveForm = async (e) => {
     if (e) e.preventDefault();
     if (!formTitle.trim()) {
-      alert('Please enter a Form Title');
+      toast.error('Please enter a Form Title');
       return;
     }
     if (formFields.length === 0) {
-      alert('Please add at least one form field');
+      toast.error('Please add at least one form field');
       return;
     }
 
     // Check duplicate keys
     const keys = formFields.map(f => f.field_key);
-    const hasDuplicates = keys.some((val, i) => keys.indexOf(val) !== i);
-    if (hasDuplicates) {
-      alert('Error: Duplicate field keys found. Each field must have a unique key.');
+    if (new Set(keys).size !== keys.length) {
+      toast.error('Error: Duplicate field keys found. Each field must have a unique key.');
       return;
     }
 
@@ -190,13 +192,13 @@ const Forms = () => {
         setIsEditing(false);
         // Refresh form configuration
         await handleSelectCategory(selectedCatId, selectedCatName, selectedCatIsSub);
-        alert('Form configuration saved successfully!');
+        toast.success('Form configuration saved successfully!');
       } else {
-        alert(res.message || 'Failed to save form');
+        toast.error(res.message || 'Failed to save form');
       }
     } catch (err) {
       console.error(err);
-      alert(err.message || 'An error occurred while saving the form');
+      toast.error(err.message || 'An error occurred while saving the form');
     } finally {
       setLoading(false);
     }
@@ -205,7 +207,8 @@ const Forms = () => {
   // Delete Form Configuration
   const handleDeleteForm = async () => {
     if (!formConfig || !formConfig.id) return;
-    if (!window.confirm(`Are you sure you want to delete form "${formTitle}"? This will delete all field configurations for this category.`)) {
+    const confirmed = await confirm(`Are you sure you want to delete form "${formTitle}"? This will delete all field configurations for this category.`);
+    if (!confirmed) {
       return;
     }
 
@@ -218,13 +221,13 @@ const Forms = () => {
         setFormFields([]);
         setIsEditing(false);
         setPreviewMode(false);
-        alert('Form configuration deleted successfully.');
+        toast.success('Form configuration deleted successfully.');
       } else {
-        alert(res.message || 'Failed to delete form');
+        toast.error(res.message || 'Failed to delete form');
       }
     } catch (err) {
       console.error(err);
-      alert(err.message || 'An error occurred while deleting the form');
+      toast.error(err.message || 'An error occurred while deleting the form');
     } finally {
       setLoading(false);
     }
@@ -232,14 +235,6 @@ const Forms = () => {
 
   // Stats
   const categoriesCount = categoriesTree.length;
-  const formsConfigured = categoriesTree.reduce((acc, cat) => {
-    let count = 0;
-    // Check if category itself is configured (this depends on forms)
-    // For counting, we check if categories list response has form_id
-    // But since tree doesn't directly have form_id, we count based on what we loaded,
-    // or keep it simple. Let's make a count.
-    return acc;
-  }, 0);
 
   return (
     <div className="space-y-4">
@@ -415,7 +410,7 @@ const Forms = () => {
               </div>
             ) : !selectedCatId ? (
               <div className="flex-1 flex flex-col items-center justify-center text-gray-400 py-16">
-                <Settings2 size={48} className="mb-2 stroke-1" />
+                <Settings2 size={48} className="stroke-1" />
                 <p>Select a Category or Subcategory from the left tree panel to begin.</p>
               </div>
             ) : previewMode ? (
@@ -485,7 +480,7 @@ const Forms = () => {
                     type="button"
                     onClick={() => {
                       console.log('Preview form values submitted:', previewValues);
-                      alert('Tested submit! Captured values:\n' + JSON.stringify(previewValues, null, 2));
+                      toast.success('Test submit successful! Check console for values.');
                     }}
                     className="px-5 py-2.5 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 transition rounded-lg shadow-sm"
                   >
@@ -639,8 +634,9 @@ const Forms = () => {
 
                 <div className="pt-4 border-t border-gray-200 flex flex-wrap justify-end gap-2.5">
                   <button
-                    onClick={() => {
-                      if (window.confirm('Discard all changes?')) {
+                    onClick={async () => {
+                      const confirmed = await confirm('Discard all changes?');
+                      if (confirmed) {
                         handleSelectCategory(selectedCatId, selectedCatName, selectedCatIsSub);
                       }
                     }}

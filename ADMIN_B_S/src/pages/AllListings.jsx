@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
+import { useConfirm } from "../contexts/ConfirmContext";
 import {
   Search,
   Filter,
@@ -23,6 +25,7 @@ import { useNavigate } from "react-router-dom";
 
 const AllListings = () => {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const [listingsData, setListingsData] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -558,8 +561,9 @@ const AllListings = () => {
       }
       setIsFormOpen(false);
       fetchListings();
+      toast.success("Operation successful");
     } catch (err) {
-      alert(err.message || "Operation failed");
+      toast.error(err.message || "Operation failed");
     }
   };
 
@@ -574,23 +578,26 @@ const AllListings = () => {
             item.id === id ? { ...item, isFeatured: !currentFeatured } : item,
           ),
         );
+        toast.success("Feature status updated");
       }
     } catch (err) {
-      alert(err.message || "Failed to update feature status");
+      toast.error(err.message || "Failed to update feature status");
     }
   };
 
   const deleteListing = async (id) => {
-    try {
-      if (window.confirm("Are you sure you want to delete this listing?")) {
+    const confirmed = await confirm("Are you sure you want to delete this listing?");
+    if (confirmed) {
+      try {
         const res = await api.delete(`/listings/${id}`);
         if (res.success) {
           setListingsData((prev) => prev.filter((item) => item.id !== id));
           setTotalItems((prev) => Math.max(0, prev - 1));
+          toast.success("Listing deleted successfully");
         }
+      } catch (err) {
+        toast.error(err.message || "Failed to delete listing");
       }
-    } catch (err) {
-      alert(err.message || "Failed to delete listing");
     }
   };
 
@@ -1427,7 +1434,8 @@ const AllListings = () => {
                 paginatedListings.map((item) => (
                   <tr
                     key={item.id}
-                    className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                    className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/approvals/listing/${item.id}`)}
                   >
                     <td className="py-3 px-5">
                       <div className="flex items-center gap-3">
@@ -1518,14 +1526,9 @@ const AllListings = () => {
                     </td>
                     <td className="py-3 px-5 text-center">
                       <div className="flex items-center justify-center gap-2">
+                        {/* View button removed */}
                         <button
-                          onClick={() => navigate(`/approvals/listing/${item.id}`)}
-                          className="flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-3 py-1.5 rounded transition-all"
-                        >
-                          <Eye size={13} /> View
-                        </button>
-                        <button
-                          onClick={() => openModal("edit", item)}
+                          onClick={(e) => { e.stopPropagation(); openModal("edit", item); }}
                           className="flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded transition-all"
                         >
                           <FileText size={13} /> Edit

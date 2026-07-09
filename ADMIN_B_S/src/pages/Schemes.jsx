@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import toast from 'react-hot-toast';
+import { useConfirm } from '../contexts/ConfirmContext';
 import {
   Landmark,
   CheckCircle2,
@@ -15,6 +17,7 @@ import {
 } from "lucide-react";
 import { api } from "../utils/api";
 const Schemes = () => {
+  const confirm = useConfirm();
   // Master Schemes Data State
   const [schemesData, setSchemesData] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -258,7 +261,7 @@ const Schemes = () => {
   const handleAddSchemeSubmit = async (e) => {
     e.preventDefault();
     if (!newScheme.category_id) {
-      alert("Please select a category");
+      toast.error("Please select a category");
       return;
     }
 
@@ -292,6 +295,7 @@ const Schemes = () => {
 
       const res = await api.post("/government-schemes", payload);
       if (res.success) {
+        toast.success("Scheme saved successfully");
         setIsAddModalOpen(false);
         setNewScheme({
           name: "",
@@ -305,11 +309,11 @@ const Schemes = () => {
         });
         loadData();
       } else {
-        alert(res.message || "Failed to create scheme");
+        toast.error(res.message || "Failed to create scheme");
       }
     } catch (err) {
       console.error(err);
-      alert("Error creating scheme");
+      toast.error("Error creating scheme");
     } finally {
       setLoading(false);
     }
@@ -333,15 +337,16 @@ const Schemes = () => {
         end_date: extendedDate
       });
       if (res.success) {
+        toast.success("Deadline extended successfully");
         setIsExtendModalOpen(false);
         setSelectedScheme(null);
         loadData();
       } else {
-        alert(res.message || "Failed to extend deadline");
+        toast.error(res.message || "Failed to extend deadline");
       }
     } catch (err) {
       console.error(err);
-      alert("Error extending deadline");
+      toast.error("Error extending deadline");
     } finally {
       setLoading(false);
     }
@@ -349,18 +354,20 @@ const Schemes = () => {
 
   // Delete scheme
   const handleDeleteScheme = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this government scheme?")) return;
+    const confirmed = await confirm("Are you sure you want to delete this government scheme?");
+    if (!confirmed) return;
     try {
       setLoading(true);
       const res = await api.delete(`/government-schemes/${id}`);
       if (res.success) {
+        toast.success("Scheme deleted successfully");
         loadData();
       } else {
-        alert(res.message || "Failed to delete scheme");
+        toast.error(res.message || "Failed to delete scheme");
       }
     } catch (err) {
       console.error(err);
-      alert("Error deleting scheme");
+      toast.error("Error deleting scheme");
     } finally {
       setLoading(false);
     }

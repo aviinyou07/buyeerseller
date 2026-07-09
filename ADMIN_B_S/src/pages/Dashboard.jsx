@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import toast from 'react-hot-toast';
 import { useNavigate } from "react-router-dom";
 import { Users, Store, ClipboardList, Hourglass } from "lucide-react";
 import { api } from "../utils/api";
@@ -91,8 +92,10 @@ const Dashboard = () => {
           item.id === id ? { ...item, status: newStatus } : item,
         ),
       );
+      toast.success("Listing status updated successfully");
     } catch (err) {
-      alert(err.message || "Failed to update listing status");
+      console.error(err);
+      toast.error(err.message || "Failed to update listing status");
     }
   };
 

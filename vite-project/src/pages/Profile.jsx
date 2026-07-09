@@ -17,7 +17,7 @@ import {
   getOrders as getOrdersFromApi,
   getSales as getSalesFromApi,
 } from "../api/ordersApi";
-import { getProfileData } from "../api/usersApi";
+import { getProfileData, updateProfileData } from "../api/usersApi";
 import { getWishlist as getWishlistFromApi } from "../api/wishlistsApi";
 import { translateStaticText, useAppText } from "../appText";
 import {
@@ -27,6 +27,7 @@ import {
   logout as logoutUser,
   saveCurrentUser,
 } from "../services/marketplaceData";
+import toast from 'react-hot-toast';
 
 // const activityActions = [
 //   {
@@ -350,7 +351,7 @@ const Profile = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editFormData.full_name || !editFormData.email || !editFormData.phone || !editFormData.address) {
-       alert(translateProfileText("Please fill all mandatory fields (Name, Email, Phone, Address)", language));
+       toast.error(translateProfileText("Please fill all mandatory fields (Name, Email, Phone, Address)", language));
        return;
     }
     
@@ -359,9 +360,10 @@ const Profile = () => {
       const updatedUser = { ...authUser, fullName: editFormData.full_name, name: editFormData.full_name, email: editFormData.email, phone: editFormData.phone };
       setAuthUser(saveCurrentUser(updatedUser));
       setIsEditing(false);
-      alert(translateProfileText("Profile updated successfully!", language));
+      toast.success(translateProfileText("Profile updated successfully!", language));
     } catch (e) {
-      alert(translateProfileText("Failed to update profile", language));
+      const msg = e.response?.data?.message || e.message || "Failed to update profile";
+      toast.error(translateProfileText(msg, language));
     }
   };
 

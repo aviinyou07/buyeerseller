@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import {
   Clock,
   FileText,
@@ -193,10 +194,10 @@ const Approvals = () => {
       }
 
       setApprovalsData(prev => prev.filter(x => x.id !== item.id));
-      alert(`${item.type} rejected successfully.`);
+      toast.success(`${item.type} rejected successfully.`);
       loadApprovals();
     } catch (err) {
-      alert(err.message || "Failed to reject item");
+      toast.error(err.message || "Failed to reject item");
     }
   };
 
@@ -211,7 +212,7 @@ const Approvals = () => {
       });
       loadApprovals();
     } catch (err) {
-      alert(err.message || "Failed to update publish status");
+      toast.error(err.message || "Failed to update publish status");
     }
   };
 
@@ -498,7 +499,8 @@ const Approvals = () => {
                 paginatedData.map((item) => (
                   <tr
                     key={item.id}
-                    className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors"
+                    className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/approvals/${item.type.toLowerCase()}/${item.rawId}`)}
                   >
                     <td className="py-3 px-5">
                       <div
@@ -576,32 +578,26 @@ const Approvals = () => {
                         {item.status === "Pending" && (
                           <>
                             <button
-                              onClick={() => handleApprove(item)}
+                              onClick={(e) => { e.stopPropagation(); handleApprove(item); }}
                               className="px-3 py-1.5 text-xs font-semibold rounded border transition text-green-600 border-green-200 bg-green-50 hover:bg-green-100 hover:border-green-300"
                             >
                               Approve
                             </button>
 
                             <button
-                              onClick={() => handleReject(item)}
+                              onClick={(e) => { e.stopPropagation(); handleReject(item); }}
                               className="px-3 py-1.5 text-xs font-semibold rounded border transition text-red-500 border-red-200 bg-red-50 hover:bg-red-100 hover:border-red-300"
                             >
                               Reject
                             </button>
-                            
-                            <button
-                              onClick={() => navigate(`/approvals/${item.type.toLowerCase()}/${item.rawId}`)}
-                              className="px-3 py-1.5 text-xs font-semibold rounded border transition text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-300"
-                            >
-                              Details
-                            </button>
+                            {/* Details button removed */}
                           </>
                         )}
 
                         {item.type === "Listing" && item.status !== "Pending" && item.status !== "Rejected" && (
                           <>
                             <button
-                              onClick={() => handlePublishToggle(item)}
+                              onClick={(e) => { e.stopPropagation(); handlePublishToggle(item); }}
                               className={`px-3 py-1.5 text-xs font-semibold rounded border transition ${
                                 item.status === "Published"
                                   ? "text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100"
@@ -610,17 +606,13 @@ const Approvals = () => {
                             >
                               {item.status === "Published" ? "Unpublish" : "Publish"}
                             </button>
-
-                            <button
-                              onClick={() => navigate(`/approvals/listing/${item.rawId}`)}
-                              className="px-3 py-1.5 text-xs font-semibold rounded border transition text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-300"
-                            >
-                              Details
-                            </button>
+                            {/* Details button removed */}
                           </>
                         )}
 
-                      </div>
+                        {item.status !== "Pending" && (item.status !== "Published" || item.type !== "Listing") && (
+                          <span className="text-xs text-gray-400 italic px-2">No actions available</span>
+                        )}                      </div>
                     </td>
                   </tr>
                 ))

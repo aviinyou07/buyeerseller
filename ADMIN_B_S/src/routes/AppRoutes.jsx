@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { ConfirmProvider } from "../contexts/ConfirmContext";
 
 import AdminLayout from "../layouts/AdminLayout";
 
@@ -20,29 +22,32 @@ import ApprovalDetails from "../pages/ApprovalDetails";
 
 const AppRoutes = () => {
   return (
-    <BrowserRouter basename="/admin">
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        
-        <Route element={<AuthGuard />}>
-          <Route path="/" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="customers" element={<Customers />} />
-            <Route path="categories" element={<Categories />} />
-            <Route path="forms" element={<Forms />} />
-            <Route path="all-listings" element={<AllListings />} />
-            <Route path="schemes" element={<Schemes />} />
-            <Route path="approvals" element={<Approvals />} />
-            <Route path="approvals/:type/:id" element={<ApprovalDetails />} />
-            <Route path="active-listings" element={<ActiveListings />} />
-            <Route path="inactive-listings" element={<InactiveListings />} />
-            <Route path="rejected-listings" element={<RejectedListings />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="settings" element={<Settings />} />
+    <ConfirmProvider>
+      <Toaster position="top-right" />
+      <BrowserRouter basename="/admin">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          
+          <Route element={<AuthGuard />}>
+            <Route path="/" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="customers" element={<Customers />} />
+              <Route path="categories" element={<Categories />} />
+              <Route path="forms" element={<Forms />} />
+              <Route path="all-listings" element={<AllListings />} />
+              <Route path="schemes" element={<Schemes />} />
+              <Route path="approvals" element={<Approvals />} />
+              <Route path="approvals/:type/:id" element={<ApprovalDetails />} />
+              <Route path="active-listings" element={<ActiveListings />} />
+              <Route path="inactive-listings" element={<InactiveListings />} />
+              <Route path="rejected-listings" element={<RejectedListings />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </ConfirmProvider>
   );
 };
 

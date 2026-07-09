@@ -197,6 +197,19 @@ class User {
     );
     return rows;
   }
+  static async updateProfile(id, { full_name, email }) {
+    await pool.query(
+      "UPDATE users SET full_name = ?, email = ?, updated_at = NOW() WHERE id = ?",
+      [full_name, email, id]
+    );
+  }
+
+  static async updatePassword(id, password_hash) {
+    await pool.query(
+      "UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?",
+      [password_hash, id]
+    );
+  }
 }
 
 module.exports = User;

@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import fs from 'fs';
 import {
   getUserAddresses,
   getUserPaymentMethods,
@@ -78,12 +79,16 @@ export async function updateProfileData(req, res) {
 
     // If seller details are provided, update seller profile
     if (business_name || gst_number) {
-      await updateSellerProfileByUserId(user.id, { business_name, gst_number });
+      await updateSellerProfileByUserId(user.id, { 
+        business_name: business_name || null, 
+        gst_number: gst_number || null 
+      });
     }
 
     return res.json({ success: true, message: 'Profile updated successfully.' });
   } catch (error) {
     console.error('[users.updateProfileData]', error);
-    return res.status(500).json({ success: false, message: 'Internal server error.' });
+    try { fs.writeFileSync('error_dump.txt', String(error.stack || error.message)); } catch(e){}
+    return res.status(500).json({ success: false, message: error.message || 'Internal server error.' });
   }
 }

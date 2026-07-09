@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Toaster } from 'react-hot-toast'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import MainLayout from './layout/MainLayout'
 import AddListing from './pages/AddListing'
@@ -44,8 +45,10 @@ const App = () => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Navigate replace to="/buy" />} />
+    <>
+      <Toaster position="top-center" />
+      <Routes>
+        <Route path="/" element={<Navigate replace to="/buy" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route element={<MainLayout />}>
@@ -110,6 +113,7 @@ const App = () => {
         <Route path="/settings" element={<Navigate replace to="/profile" />} />
       </Route>
     </Routes>
+    </>
   )
 }
 

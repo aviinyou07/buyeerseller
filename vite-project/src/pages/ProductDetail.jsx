@@ -89,6 +89,7 @@ const normalizeBackendProduct = (apiProduct) => {
     image: primaryImage || photos[0] || '',
     images: photos,
     sellerName: apiProduct.seller_name || '',
+    sellerRating: Number(apiProduct.seller_rating || 0),
     contactNumber: apiProduct.seller_phone || '',
     postedAt: formatPostedAt(apiProduct.created_at),
     condition,
@@ -471,7 +472,7 @@ const ProductDetail = () => {
       [
         product?.image,
         ...(Array.isArray(product?.images) ? product.images : []),
-      ].filter((image, index, images) => images.indexOf(image) === index).slice(0, 4),
+      ].filter((image, index, images) => images.indexOf(image) === index),
     [product],
   )
   const [selectedImage, setSelectedImage] = useState('')
@@ -1248,7 +1249,7 @@ const ProductDetail = () => {
               </p>
             </div>
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#4d49b9] px-3 py-1.5 text-xs font-black text-white">
-              4.5
+              {product.sellerRating > 0 ? product.sellerRating.toFixed(1) : 'New'}
               <Star className="size-3 fill-white" />
             </span>
             <span className="inline-flex items-center gap-1 rounded-full bg-[#f1efff] px-2.5 py-1 text-[10px] font-black text-[#4d49b9]">

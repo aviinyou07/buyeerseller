@@ -1,4 +1,11 @@
-import { Mail, MessageSquareText, Phone, UserRound, X } from "lucide-react";
+import { Mail, MessageSquareText, Phone, UserRound, X, Eye, Heart, Star, MessageCircle } from "lucide-react";
+
+// Helper function to format numbers
+const formatNumber = (num) => {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+  if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+  return String(num || 0);
+};
 
 const formatDate = (value) => {
   if (!value) return "Recently";
@@ -40,6 +47,14 @@ const InterestedUsersModal = ({
             <h2 className="mt-1 truncate text-lg font-semibold text-gray-900">
               {product?.title || "Product interest"}
             </h2>
+            {product && (
+              <div className="mt-2 flex items-center gap-4 text-xs font-semibold text-gray-500">
+                <span className="flex items-center gap-1"><Eye size={14} className="text-gray-400" /> {formatNumber(product.viewsCount)}</span>
+                <span className="flex items-center gap-1"><Heart size={14} className="text-gray-400" /> {formatNumber(product.likesCount)}</span>
+                <span className="flex items-center gap-1"><MessageCircle size={14} className="text-gray-400" /> {formatNumber(product.reviewsCount)}</span>
+                <span className="flex items-center gap-1 text-orange-500"><Star size={14} className="fill-current" /> {product.averageRating ? product.averageRating.toFixed(1) : "0.0"}</span>
+              </div>
+            )}
           </div>
           <button
             aria-label="Close interested users"

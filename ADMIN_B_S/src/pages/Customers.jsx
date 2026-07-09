@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import toast from 'react-hot-toast';
+import { useConfirm } from '../contexts/ConfirmContext';
 import {
   Users,
   UserCheck,
@@ -26,6 +28,7 @@ import { api } from "../utils/api";
 import {createPortal} from "react-dom";
 
 const Customers = () => {
+  const confirm = useConfirm();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [dateFilter, setDateFilter] = useState("All Time");
@@ -316,10 +319,11 @@ const Customers = () => {
           if (res && res.success && res.data) {
             // Reload customers from server so display is always consistent
             setRefreshKey((prev) => prev + 1);
+            toast.success("Customer created successfully");
           }
         } catch (err) {
           console.error("Failed to create customer", err);
-          alert(err.message || "Failed to create customer");
+          toast.error(err.message || "Failed to create customer");
         }
       })();
     } else if (customerFormMode === "edit") {
@@ -459,9 +463,10 @@ const Customers = () => {
             ...prev,
             status: prev.status === "Blocked" ? "Active" : "Blocked",
           }));
+        toast.success("Customer status updated");
       } catch (err) {
         console.error("Failed to update customer status", err);
-        alert(err.message || "Failed to update status");
+        toast.error(err.message || "Failed to update status");
       }
     })();
   };
@@ -495,19 +500,22 @@ const Customers = () => {
         }
       }));
       setRefreshKey(prev => prev + 1);
+      toast.success("Seller verified successfully!");
     } catch (err) {
-      alert("Failed to verify seller");
+      toast.error("Failed to verify seller");
     }
   };
 
   const handleDeleteCustomer = async (id) => {
-    if(!window.confirm("Are you sure you want to completely delete this customer?")) return;
+    const confirmed = await confirm("Are you sure you want to completely delete this customer?");
+    if(!confirmed) return;
     try {
       await api.delete(`/customers/${id}`);
       setSelectedCustomer(null);
       setRefreshKey(prev => prev + 1);
+      toast.success("Customer deleted permanently");
     } catch(err) {
-      alert("Failed to delete customer");
+      toast.error("Failed to delete customer");
     }
   };
 
@@ -986,7 +994,8 @@ const Customers = () => {
                 paginatedCustomers.map((customer) => (
                   <tr
                     key={customer.id}
-                    className="border-b border-gray-100 hover:bg-gray-50/50"
+                    className="border-b border-gray-100 hover:bg-gray-50/50 cursor-pointer"
+                    onClick={() => setSelectedCustomer(customer)}
                   >
                     <td className="py-3 px-5">
                       <div className="flex items-center gap-3">
@@ -1026,7 +1035,7 @@ const Customers = () => {
                       <div className="flex items-center gap-2">
                         {customer.status !== "Blocked" ? (
                           <button
-                            onClick={() => toggleBlockStatus(customer.id)}
+                            onClick={(e) => { e.stopPropagation(); toggleBlockStatus(customer.id); }}
                             className="flex items-center gap-1.5 px-2 py-1 text-xs text-[#4f6bff] bg-blue-50 border border-[#dbe5ff] hover:bg-blue-100 transition"
                           >
                             <Ban size={14} className="text-[#4f6bff]" />
@@ -1034,7 +1043,7 @@ const Customers = () => {
                           </button>
                         ) : (
                           <button
-                            onClick={() => toggleBlockStatus(customer.id)}
+                            onClick={(e) => { e.stopPropagation(); toggleBlockStatus(customer.id); }}
                             className="flex items-center gap-1.5 px-2 py-1 text-xs text-green-600 bg-green-50 border border-green-200 hover:bg-green-100 transition"
                           >
                             <CheckCircle2
@@ -1044,13 +1053,7 @@ const Customers = () => {
                             Unblock
                           </button>
                         )}
-                        <button
-                          onClick={() => setSelectedCustomer(customer)}
-                          className="p-1 px-1.5 text-blue-500 text-sm border border-blue-100 bg-blue-50 hover:bg-blue-100 transition flex items-center gap-1"
-                        >
-                          <Eye size={14} />
-                          View
-                        </button>
+                        {/* View button removed */}
                       </div>
                     </td>
                   </tr>

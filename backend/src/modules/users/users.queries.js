@@ -112,23 +112,17 @@ export async function updateUserAddress(userId, address) {
  * Update seller profile business details
  */
 export async function updateSellerProfileByUserId(userId, { business_name, gst_number }) {
-  // Find seller profile ID from users
-  const [user] = await pool.query('SELECT seller_profile_id FROM users WHERE id = ? LIMIT 1', [userId]);
-  if (user.length > 0) {
-    if (user[0].seller_profile_id) {
-      await pool.query(
-        'UPDATE seller_profiles SET business_name = ?, gst_number = ? WHERE id = ?',
-        [business_name, gst_number, user[0].seller_profile_id]
-      );
-    } else if (business_name || gst_number) {
-      const [insertResult] = await pool.query(
-        'INSERT INTO seller_profiles (user_id, business_name, gst_number, is_verified) VALUES (?, ?, ?, 0)',
-        [userId, business_name, gst_number]
-      );
-      await pool.query(
-        'UPDATE users SET seller_profile_id = ? WHERE id = ?',
-        [insertResult.insertId, userId]
-      );
-    }
+  const [existing] = await pool.query('SELECT id FROM seller_profiles WHERE user_id = ? LIMIT 1', [userId]);
+  
+  if (existing.length > 0) {
+    await pool.query(
+      'UPDATE seller_profiles SET business_name = ?, gst_number = ? WHERE id = ?',
+      [business_name, gst_number, existing[0].id]
+    );
+  } else if (business_name || gst_number) {
+    await pool.query(
+      'INSERT INTO seller_profiles (user_id, business_name, gst_number, is_verified) VALUES (?, ?, ?, 0)',
+      [userId, business_name, gst_number]
+    );
   }
 }

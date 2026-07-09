@@ -68,7 +68,7 @@ const Login = () => {
             <ShoppingBag size={28} className="text-white" />
           </div>
           <h2 className="text-2xl font-bold text-white tracking-tight">Welcome Back Admin</h2>
-          <p className="text-sm text-gray-400 mt-1.5">Sign in to manage the Buyer-Seller marketplace</p>
+          <p className="text-sm text-gray-400 mt-1.5">Sign in to manage the Customer marketplace</p>
         </div>
 
         {/* Error Notification Alert */}
@@ -131,7 +131,7 @@ const Login = () => {
 
         {/* Footer info */}
         <div className="mt-8 text-center text-xs text-gray-500">
-          Buyer-Seller Marketplace Administration Portal &copy; {new Date().getFullYear()}
+          Marketplace Administration Portal &copy; {new Date().getFullYear()}
         </div>
       </div>
     </div>

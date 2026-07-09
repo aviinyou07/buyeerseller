@@ -99,21 +99,13 @@ export const getProduct = async (productId) => {
 }
 
 export const createProduct = async (formData) => {
-  const response = await axiosClient.post('/listings', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  })
+  const response = await axiosClient.post('/listings', formData)
 
   return response.data
 }
 
 export const updateProduct = async (productId, formData) => {
-  const response = await axiosClient.put(`/listings/${productId}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  })
+  const response = await axiosClient.put(`/listings/${productId}`, formData)
 
   return response.data
 }

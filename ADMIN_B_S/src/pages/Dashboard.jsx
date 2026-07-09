@@ -50,10 +50,10 @@ const Dashboard = () => {
               item.main_image?.url ||
               "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=300",
             title: item.title,
-            seller:
+            customer:
               item.seller?.user?.full_name ||
               item.seller?.business_name ||
-              "Unknown Seller",
+              "Unknown Customer",
             status:
               item.listing_status === "approved"
                 ? "Active"
@@ -102,20 +102,11 @@ const Dashboard = () => {
   const stats = [
     {
       id: 1,
-      title: "Total Buyers",
-      value: counters ? Number(counters.totalBuyers).toLocaleString() : "...",
+      title: "Total Customers",
+      value: counters ? Number(counters.totalUsers).toLocaleString() : "...",
       icon: <Users size={24} className="text-[#4f6bff]" />,
       cardBg: "bg-gradient-to-br from-[#f5f7ff] via-[#eef2ff] to-[#e0e7ff]",
       iconBg: "bg-gradient-to-br from-[#dbe5ff] to-[#eef2ff]",
-      growthColor: "text-green-500",
-    },
-    {
-      id: 2,
-      title: "Total Sellers",
-      value: counters ? Number(counters.totalSellers).toLocaleString() : "...",
-      icon: <Store size={24} className="text-green-600" />,
-      cardBg: "bg-gradient-to-br from-[#f1fff7] via-[#e8fff1] to-[#dff7e8]",
-      iconBg: "bg-gradient-to-br from-[#ccf5db] to-[#e9fff1]",
       growthColor: "text-green-500",
     },
     {
@@ -175,7 +166,7 @@ const Dashboard = () => {
       {/* Stats Cards */}
       {/* ====================================================== */}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 mb-6">
         {stats.map((item) => (
           <div
             key={item.id}
@@ -187,7 +178,7 @@ const Dashboard = () => {
 
                 <h1
                   className="
-                    text-[24px] sm:text-[30px]
+                    text-[20px] sm:text-[30px]
                     leading-none
                     font-bold
                     mt-1 sm:mt-2
@@ -224,15 +215,7 @@ const Dashboard = () => {
       {/* Pending Approvals */}
       {/* ====================================================== */}
 
-      <div
-        className="
-          bg-white
-          
-          border
-          border-gray-200
-          shadow-sm
-        "
-      >
+      <div className="bg-white border border-gray-200 shadow-sm mt-6 w-full overflow-hidden">
         {/* Header */}
         <div
           className="
@@ -267,8 +250,8 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Table - Desktop */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full min-w-[800px] whitespace-nowrap">
             <thead>
               <tr className="border-b">
@@ -440,6 +423,44 @@ const Dashboard = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Cards - Pending Approvals */}
+        <div className="grid gap-3 p-4 lg:hidden">
+          {approvalsList.map((item) => (
+            <div key={item.id} className="border border-gray-100 rounded-lg p-3 space-y-3 shadow-sm bg-white">
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-gray-900 line-clamp-2">{item.title}</span>
+                  <span className="text-xs text-gray-500 mt-1">{item.user} • {item.date}</span>
+                </div>
+                <span className={`px-2 py-1 rounded-sm text-[12px] font-medium whitespace-nowrap ${getStatusStyle(item.status)}`}>
+                  {item.status}
+                </span>
+              </div>
+              <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-50">
+                <span className="px-2 py-[2px] rounded-sm bg-blue-100 text-blue-600 text-xs font-medium">
+                  {item.type}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleStatusChange(item.id, "Approved")}
+                    disabled={item.status === "Approved"}
+                    className={`px-3 py-1 text-xs border rounded-sm transition-all ${item.status === "Approved" ? "border-gray-300 text-gray-400 cursor-not-allowed" : "border-green-500 text-green-600 hover:bg-green-500 hover:text-white"}`}
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange(item.id, "Rejected")}
+                    disabled={item.status === "Rejected"}
+                    className={`px-3 py-1 text-xs border rounded-sm transition-all ${item.status === "Rejected" ? "border-gray-300 text-gray-400 cursor-not-allowed" : "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"}`}
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ====================================================== */}
@@ -452,6 +473,8 @@ const Dashboard = () => {
           border
           border-gray-200
           shadow-sm
+          w-full
+          overflow-hidden
         "
       >
         {/* Header */}
@@ -486,8 +509,8 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Table - Desktop */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full min-w-[800px] whitespace-nowrap">
             <thead>
               <tr className="border-b">
@@ -513,7 +536,7 @@ const Dashboard = () => {
                     font-medium
                   "
                 >
-                  Seller
+                  Customer
                 </th>
 
                 <th
@@ -565,7 +588,7 @@ const Dashboard = () => {
                   </td>
 
                   <td className="py-2 text-[14px] text-gray-700">
-                    {item.seller}
+                    {item.customer}
                   </td>
 
                   <td className="py-2">
@@ -591,7 +614,29 @@ const Dashboard = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Cards - Recent Listings */}
+        <div className="grid gap-3 p-4 lg:hidden">
+          {recentListingsList.map((item) => (
+            <div key={item.id} className="border border-gray-100 rounded-lg p-3 shadow-sm bg-white flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <img src={item.image} alt={item.title} className="w-12 h-12 rounded-lg object-cover border border-gray-100 shadow-sm" />
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-sm font-semibold text-gray-900 truncate" title={item.title}>{item.title}</span>
+                  <span className="text-xs text-gray-500 truncate">{item.customer}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+                <span className="text-xs text-gray-500">{item.date}</span>
+                <span className={`px-2 py-1 rounded-sm text-xs font-medium ${getStatusStyle(item.status)}`}>
+                  {item.status}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
+
     </div>
   );
 };

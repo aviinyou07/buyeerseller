@@ -567,8 +567,8 @@ const Customers = () => {
                   <span className="text-blue-600 font-medium text-sm">{selectedCustomer.handle}</span>
                   <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                   <span className="text-gray-500 font-medium text-sm flex items-center gap-1.5">
-                    {isSeller ? <Store size={14} className="text-orange-500" /> : <Users size={14} className="text-blue-500" />}
-                    {isSeller ? 'Seller Account' : 'Buyer Account'}
+                    <Users size={14} className="text-blue-500" />
+                    Customer Account
                   </span>
                 </div>
               </div>
@@ -603,7 +603,7 @@ const Customers = () => {
           </div>
           <div className="bg-gradient-to-br from-[#f1fff7] via-[#e8fff1] to-[#dff7e8] rounded-xl border border-white/60 p-4 shadow-sm flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{isSeller ? 'Total Revenue' : 'Total Spent'}</span>
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Revenue</span>
               <CreditCard size={18} className="text-green-600" />
             </div>
             <h4 className="text-3xl font-extrabold text-gray-900">{selectedCustomer.totalSpent || "$0.00"}</h4>
@@ -643,7 +643,7 @@ const Customers = () => {
             {isSeller && (
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
                 <h3 className="text-[15px] font-bold text-gray-900 mb-3 border-b border-gray-100 pb-2 flex items-center gap-2">
-                  <Store size={16} className="text-gray-400" /> Seller Information
+                  <Store size={16} className="text-gray-400" /> Business Information
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
@@ -659,7 +659,7 @@ const Customers = () => {
                     <span className="font-semibold text-gray-900 text-[14px]">{selectedCustomer.raw?.seller_details?.total_listings || 0}</span>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">Seller Profile ID</span>
+                    <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">Business Profile ID</span>
                     <span className="font-semibold text-gray-900 text-[14px]">{selectedCustomer.raw?.seller_profile_id || 'N/A'}</span>
                   </div>
                 </div>
@@ -745,7 +745,7 @@ const Customers = () => {
               {customerFormMode === "add" ? "Add New Customer" : "Edit Customer"}
             </h1>
             <p className="text-xs text-gray-500">
-              {customerFormMode === "add" ? "Create a new buyer or seller account profile." : "Update profile details for this customer account."}
+              {customerFormMode === "add" ? "Create a new customer account profile." : "Update profile details for this customer account."}
             </p>
           </div>
         </div>
@@ -876,17 +876,19 @@ const Customers = () => {
             key={item.id}
             className={`${item.cardBg} rounded-xl border border-white/60 p-2 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-200`}
           >
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-[12px] sm:text-[14px] text-gray-600">{item.title}</h3>
-                <h1 className="text-[24px] sm:text-[30px] leading-none font-bold mt-1 sm:mt-2 text-black">
-                  {item.value}
-                </h1>
-              </div>
-              <div
-                className={`w-[40px] h-[40px] sm:w-[54px] sm:h-[54px] rounded-xl flex items-center justify-center ${item.iconBg}`}
-              >
-                <div className="scale-75 sm:scale-100">{item.icon}</div>
+            <div className="flex flex-col">
+              <h3 className="text-[12px] sm:text-[14px] text-gray-600 mb-1 sm:mb-2">{item.title}</h3>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-xl sm:text-3xl leading-none font-bold text-black">
+                    {item.value}
+                  </h1>
+                </div>
+                <div
+                  className={`w-[36px] h-[36px] sm:w-[54px] sm:h-[54px] rounded-xl flex items-center justify-center ${item.iconBg}`}
+                >
+                  <div className="scale-75 sm:scale-100">{item.icon}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -899,7 +901,7 @@ const Customers = () => {
             All Customers
           </h2>
           <div className="w-full lg:w-auto">
-            <div className="flex items-center gap-3 justify-end">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-end w-full">
               <div className="relative w-full sm:w-[260px]">
                 <Search
                   size={16}
@@ -915,7 +917,7 @@ const Customers = () => {
               </div>
               <button
                 onClick={() => openCustomerForm("add")}
-                className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-all rounded shadow-sm"
+                className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-all rounded shadow-sm whitespace-nowrap"
               >
                 <Plus size={16} /> Add Customer
               </button>
@@ -923,13 +925,13 @@ const Customers = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-end gap-3 p-3 sm:p-4 md:px-5 md:py-3 border-b border-gray-100">
-          <div className="flex flex-col gap-1.5 w-full sm:w-[170px]">
-            <label className="text-sm text-gray-700 font-medium">Status</label>
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-end gap-3 p-3 sm:p-4 md:px-5 md:py-3 border-b border-gray-100">
+          <div className="flex flex-col gap-1.5 col-span-1 w-full sm:w-[170px]">
+            <label className="text-[11px] sm:text-sm text-gray-700 font-medium">Status</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-sm border border-gray-300 bg-white outline-none focus:ring-1 focus:ring-blue-700 text-gray-700"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-[12px] sm:text-sm border border-gray-300 bg-white outline-none focus:ring-1 focus:ring-blue-700 text-gray-700"
             >
               <option value="All Status">All Status</option>
               <option value="Active">Active</option>
@@ -938,14 +940,14 @@ const Customers = () => {
             </select>
           </div>
 
-          <div className="flex flex-col gap-1.5 w-full sm:w-[170px]">
-            <label className="text-sm text-gray-700 font-medium">
+          <div className="flex flex-col gap-1.5 col-span-1 w-full sm:w-[170px]">
+            <label className="text-[11px] sm:text-sm text-gray-700 font-medium">
               Joined Date
             </label>
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="px-3 py-2 text-sm border border-gray-300 bg-white outline-none focus:ring-1 focus:ring-blue-500 text-gray-700"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-[12px] sm:text-sm border border-gray-300 bg-white outline-none focus:ring-1 focus:ring-blue-500 text-gray-700"
             >
               <option value="All Time">All Time</option>
               {[...new Set(customersData.map((b) => b.joinedDate))].map(
@@ -968,7 +970,8 @@ const Customers = () => {
           </div>
         </div>
 
-        <div className="w-full max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+        {/* Table Content - Desktop */}
+        <div className="hidden lg:block w-full max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
           <table className="min-w-[1050px] w-full whitespace-nowrap">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/50">
@@ -1070,6 +1073,69 @@ const Customers = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="grid gap-3 p-4 lg:hidden">
+          {paginatedCustomers.length > 0 ? (
+            paginatedCustomers.map((customer) => (
+              <div
+                key={customer.id}
+                className="border border-gray-100 rounded-lg p-3 shadow-sm bg-white flex flex-col gap-3 cursor-pointer"
+                onClick={() => setSelectedCustomer(customer)}
+              >
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${customer.avatarBg} ${customer.avatarText}`}>
+                      {customer.initials}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-sm font-semibold text-gray-900 truncate">{customer.name}</span>
+                      <span className="text-xs text-gray-500">Joined {customer.joinedDate}</span>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-medium whitespace-nowrap rounded ${getStatusStyle(customer.status)}`}>
+                    {customer.status}
+                  </span>
+                </div>
+                
+                <div className="flex flex-col gap-1.5 pt-2 border-t border-gray-50">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Phone size={14} className="text-gray-400" />
+                    <span>{customer.phone}</span>
+                  </div>
+                  {customer.email && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Mail size={14} className="text-gray-400" />
+                      <span className="truncate">{customer.email}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-50">
+                  {customer.status !== "Blocked" ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleBlockStatus(customer.id); }}
+                      className="flex items-center justify-center flex-1 gap-1.5 px-3 py-2 text-xs font-medium text-[#4f6bff] bg-blue-50 border border-[#dbe5ff] hover:bg-blue-100 transition rounded"
+                    >
+                      <Ban size={14} className="text-[#4f6bff]" /> Block
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleBlockStatus(customer.id); }}
+                      className="flex items-center justify-center flex-1 gap-1.5 px-3 py-2 text-xs font-medium text-green-600 bg-green-50 border border-green-200 hover:bg-green-100 transition rounded"
+                    >
+                      <CheckCircle2 size={14} className="text-green-600" /> Unblock
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-8 text-center text-gray-500 text-sm border border-gray-100 rounded-lg bg-gray-50">
+              No customers found.
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-100">

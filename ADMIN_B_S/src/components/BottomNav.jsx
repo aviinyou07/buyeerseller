@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, UserRound, Contact, Folder } from 'lucide-react';
+import { LayoutDashboard, Contact, Folder, CheckCircle2, List } from 'lucide-react';
 
 const BottomNav = () => {
   const location = useLocation();
@@ -9,6 +9,8 @@ const BottomNav = () => {
     { title: "Dashboard", icon: LayoutDashboard, path: "/" },
     { title: "Customers", icon: Contact, path: "/customers" },
     { title: "Categories", icon: Folder, path: "/categories" },
+    { title: "Approvals", icon: CheckCircle2, path: "/approvals" },
+    { title: "Listings", icon: List, path: "/all-listings" },
   ];
 
   return (

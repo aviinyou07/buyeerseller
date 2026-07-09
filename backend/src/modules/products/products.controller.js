@@ -37,12 +37,11 @@ export const uploadMiddleware = upload.array('photos', 10);
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 function getUserFromToken(req) {
   const auth = req.headers.authorization;
-  if (!auth?.startsWith('Bearer ')) return null;
+  if (!auth?.startsWith('Bearer ')) return { error: 'No Bearer token' };
   try {
     return jwt.verify(auth.slice(7), process.env.JWT_SECRET);
   } catch (err) {
-    console.error('[getUserFromToken] verification failed:', err.message);
-    return null;
+    return { error: err.message };
   }
 }
 
@@ -195,8 +194,10 @@ export async function postProduct(req, res) {
  */
 export async function putProduct(req, res) {
   try {
+    const auth = req.headers.authorization;
     const user = getUserFromToken(req);
-    if (!user) return res.status(401).json({ success: false, message: 'Authentication required.' });
+    if (user?.error) return res.status(401).json({ success: false, message: `Auth Failed: ${user.error}` });
+    if (!user) return res.status(401).json({ success: false, message: `Authentication required.` });
 
     const { title, price, brand, description, location, subcategory_slug, condition, warranty, usedFor, offer_badge, custom_fields } = req.body;
 

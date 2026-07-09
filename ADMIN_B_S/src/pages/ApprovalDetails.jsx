@@ -301,11 +301,11 @@ const ApprovalDetails = () => {
             </div>
           </div>
 
-          {/* Seller Details */}
+          {/* Customer Details */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             <div className="p-3 border-b border-gray-100 flex items-center gap-1.5">
               <User size={14} className="text-gray-400" />
-              <h2 className="text-sm font-semibold text-gray-800">Seller</h2>
+              <h2 className="text-sm font-semibold text-gray-800">Customer</h2>
             </div>
             <div className="p-4">
               <div className="flex items-center gap-3 mb-3">

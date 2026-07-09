@@ -387,7 +387,7 @@ const Schemes = () => {
           </button>
           <div>
             <h1 className="text-xl font-bold text-gray-900">Create New Government Scheme</h1>
-            <p className="text-xs text-gray-500">Publish a new welfare scheme for marketplace sellers and buyers.</p>
+            <p className="text-xs text-gray-500">Publish a new welfare scheme for marketplace customers.</p>
           </div>
         </div>
 

@@ -16,7 +16,7 @@ import {
   Clock,
   Eye,
   XCircle,
-
+  User,
   Star,
 } from "lucide-react";
 import { api } from "../utils/api";
@@ -651,7 +651,7 @@ const AllListings = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-semibold text-gray-700">
-                  Seller
+                  Customer
                 </label>
                 {formMode === "view" ? (
                   <input
@@ -672,7 +672,7 @@ const AllListings = () => {
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded bg-white text-sm text-gray-800"
                   >
-                    <option value="">Select a seller</option>
+                    <option value="">Select a customer</option>
                     {sellers.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.name}
@@ -1265,19 +1265,19 @@ const AllListings = () => {
             className={`${item.cardBg} rounded-xl border border-white/60 p-2 shadow-sm hover:shadow-md transition-shadow`}
           >
             <div className="flex flex-col">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
                 {item.title}
               </h3>
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                     {item.value}
                   </h1>
                 </div>
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${item.iconBg}`}
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${item.iconBg}`}
                 >
-                  {item.icon}
+                  {React.cloneElement(item.icon, { size: 16 })}
                 </div>
               </div>
             </div>
@@ -1290,15 +1290,15 @@ const AllListings = () => {
         {/* Top Filter Bar */}
         <div className="p-4 border-b border-gray-100 space-y-4 md:space-y-0 text-gray-700">
           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
-            <div className="flex flex-wrap items-end gap-3 md:gap-4 flex-1">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-end gap-3 md:gap-4 flex-1">
               {/* Search and Dropdowns */}
-              <div className="flex flex-col gap-1.5 w-full sm:w-auto">
-                <label className="text-[13px] text-gray-500 font-medium">
+              <div className="col-span-2 flex flex-col gap-1.5 w-full sm:w-auto">
+                <label className="text-[11px] sm:text-[13px] text-gray-500 font-medium">
                   Search
                 </label>
                 <div className="relative">
                   <Search
-                    size={16}
+                    size={14}
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                   />
                   <input
@@ -1306,13 +1306,13 @@ const AllListings = () => {
                     placeholder="Search listings..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full sm:w-[220px] pl-9 pr-4 py-2 text-sm border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                    className="w-full sm:w-[220px] pl-8 pr-4 py-1.5 sm:py-2 text-[13px] sm:text-sm border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5 w-full sm:w-auto">
-                <label className="text-[13px] text-gray-500 font-medium">
+              <div className="col-span-1 flex flex-col gap-1.5 w-full sm:w-auto">
+                <label className="text-[11px] sm:text-[13px] text-gray-500 font-medium">
                   Category
                 </label>
                 <select
@@ -1321,7 +1321,7 @@ const AllListings = () => {
                     setCategoryFilter(e.target.value);
                     setSubCategoryFilter("All Sub Categories");
                   }}
-                  className="w-full sm:min-w-[140px] px-3 py-2 text-sm text-gray-700 border border-gray-300 bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full sm:min-w-[140px] px-2 py-1.5 sm:py-2 text-[12px] sm:text-sm text-gray-700 border border-gray-300 bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="All Categories">All Categories</option>
                   {rootCategories.map((cat) => (
@@ -1332,15 +1332,15 @@ const AllListings = () => {
                 </select>
               </div>
 
-              <div className="flex flex-col gap-1.5 w-full sm:w-auto">
-                <label className="text-[13px] text-gray-500 font-medium">
+              <div className="col-span-1 flex flex-col gap-1.5 w-full sm:w-auto">
+                <label className="text-[11px] sm:text-[13px] text-gray-500 font-medium">
                   Sub Category
                 </label>
                 <select
                   value={subCategoryFilter}
                   onChange={(e) => setSubCategoryFilter(e.target.value)}
                   disabled={categoryFilter === "All Categories"}
-                  className="w-full sm:min-w-[160px] px-3 py-2 text-sm text-gray-700 border border-gray-300 bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full sm:min-w-[160px] px-2 py-1.5 sm:py-2 text-[12px] sm:text-sm text-gray-700 border border-gray-300 bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="All Sub Categories">All Sub Categories</option>
                   {filteredSubCategories.map((subCat) => (
@@ -1351,16 +1351,16 @@ const AllListings = () => {
                 </select>
               </div>
 
-              <div className="flex flex-col gap-1.5 w-full sm:w-auto">
-                <label className="text-[13px] text-gray-500 font-medium">
-                  Seller
+              <div className="col-span-1 flex flex-col gap-1.5 w-full sm:w-auto">
+                <label className="text-[11px] sm:text-[13px] text-gray-500 font-medium">
+                  Customer
                 </label>
                 <select
                   value={sellerFilter}
                   onChange={(e) => setSellerFilter(e.target.value)}
-                  className="w-full sm:min-w-[160px] px-3 py-2 text-sm text-gray-700 border border-gray-300 bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full sm:min-w-[160px] px-2 py-1.5 sm:py-2 text-[12px] sm:text-sm text-gray-700 border border-gray-300 bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
-                  <option value="">All Sellers</option>
+                  <option value="">All Customers</option>
                   {sellers.map((seller) => (
                     <option key={seller.id} value={seller.id}>
                       {seller.name}
@@ -1369,14 +1369,14 @@ const AllListings = () => {
                 </select>
               </div>
 
-              <div className="flex flex-col gap-1.5 w-full sm:w-auto">
-                <label className="text-[13px] text-gray-500 font-medium">
+              <div className="col-span-1 flex flex-col gap-1.5 w-full sm:w-auto">
+                <label className="text-[11px] sm:text-[13px] text-gray-500 font-medium">
                   Status
                 </label>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full sm:min-w-[130px] px-3 py-2 text-sm text-gray-700 border border-gray-300 bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full sm:min-w-[130px] px-2 py-1.5 sm:py-2 text-[12px] sm:text-sm text-gray-700 border border-gray-300 bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="All Status">All Status</option>
                   <option value="Active">Active</option>
@@ -1398,8 +1398,8 @@ const AllListings = () => {
           </div>
         </div>
 
-        {/* Table Content */}
-        <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {/* Table Content - Desktop */}
+        <div className="hidden lg:block overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <table className="w-full whitespace-nowrap text-left">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/50">
@@ -1407,7 +1407,7 @@ const AllListings = () => {
                   Listing (Thumbnail)
                 </th>
                 <th className="py-3 px-5 text-sm font-semibold text-gray-700">
-                  Seller
+                  Customer
                 </th>
                 <th className="py-3 px-5 text-sm font-semibold text-gray-700">
                   Category
@@ -1550,6 +1550,56 @@ const AllListings = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Table Content - Mobile Cards */}
+        <div className="grid gap-3 p-4 lg:hidden">
+          {paginatedListings.length > 0 ? (
+            paginatedListings.map((item) => (
+              <div 
+                key={item.id} 
+                className="border border-gray-100 rounded-lg p-3 shadow-sm bg-white flex flex-col gap-3 cursor-pointer"
+                onClick={() => navigate(`/approvals/listing/${item.id}`)}
+              >
+                <div className="flex gap-3">
+                  <img src={item.thumbnail || item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover border border-gray-200 shadow-xs flex-shrink-0" />
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-2">
+                      <span className="text-sm font-semibold text-gray-900 line-clamp-2">{item.name}</span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleFeature(item.id, item.isFeatured); }}
+                        className="focus:outline-none flex-shrink-0"
+                      >
+                        <Star size={16} className={item.isFeatured ? "text-yellow-500 fill-yellow-500" : "text-gray-300 hover:text-yellow-500"} />
+                      </button>
+                    </div>
+                    <span className="text-xs text-gray-500 mt-1">{item.code} • {item.category}</span>
+                    <span className="text-sm font-bold text-gray-900 mt-1">{item.price}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                    <User size={12} className="text-gray-400" />
+                    <span className="truncate max-w-[120px]">{item.sellerName}</span>
+                  </div>
+                  <span className={getStatusStyle(item.status)}>{item.status}</span>
+                </div>
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-50">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openModal("edit", item); }}
+                    className="flex items-center justify-center flex-1 gap-1 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-3 py-2 rounded transition-all"
+                  >
+                    <FileText size={13} /> Edit Listing
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-8 text-center text-gray-500 text-sm border border-gray-100 rounded-lg bg-gray-50">
+              No listings found matching your criteria.
+            </div>
+          )}
+        </div>
+
 
         {/* Pagination */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-100">

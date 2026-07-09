@@ -420,11 +420,11 @@ const Forms = () => {
                 <div className="border-b border-gray-100 pb-4 flex justify-between items-center">
                   <div>
                     <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
-                      Seller View Preview
+                      Customer View Preview
                     </span>
                     <h3 className="text-base font-extrabold text-gray-900 mt-1">{formTitle || 'Marketplace Form'}</h3>
                   </div>
-                  <HelpCircle size={16} className="text-gray-400" title="This is a live test preview of how fields render to sellers." />
+                  <HelpCircle size={16} className="text-gray-400" title="This is a live test preview of how fields render to customers." />
                 </div>
 
                 <div className="space-y-4">
@@ -497,7 +497,7 @@ const Forms = () => {
                 </div>
                 <p className="font-semibold text-gray-700">No Form Configuration Configured</p>
                 <p className="text-xs text-gray-500 mt-1 max-w-sm">
-                  Sellers listing items in <strong className="text-gray-700">{selectedCatName}</strong> will only see general common inputs. Create a form config to request dynamic category-specific details.
+                  Customers listing items in <strong className="text-gray-700">{selectedCatName}</strong> will only see general common inputs. Create a form config to request dynamic category-specific details.
                 </p>
                 <button
                   onClick={() => {
@@ -520,7 +520,7 @@ const Forms = () => {
                 {/* Form Title config */}
                 <div className="bg-white p-5 border border-gray-200 rounded-2xl shadow-sm space-y-2">
                   <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
-                    Form Title (Publicly visible to Sellers)
+                    Form Title (Publicly visible to Customers)
                   </label>
                   <input
                     type="text"

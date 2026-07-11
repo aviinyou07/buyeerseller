@@ -21,10 +21,11 @@ import {
 } from "lucide-react";
 import { api } from "../utils/api";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const AllListings = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const confirm = useConfirm();
   const [listingsData, setListingsData] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -408,6 +409,16 @@ const AllListings = () => {
     }
     setIsFormOpen(true);
   };
+
+  useEffect(() => {
+    if (location.state?.editProductId && listingsData.length > 0) {
+      const productToEdit = listingsData.find((p) => p.id === location.state.editProductId);
+      if (productToEdit) {
+        openModal("edit", productToEdit);
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [location.state?.editProductId, listingsData]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;

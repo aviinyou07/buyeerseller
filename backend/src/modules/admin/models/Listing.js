@@ -289,7 +289,9 @@ class Listing {
         approved: 'active',
         rejected: 'rejected',
         draft: 'draft',
-        inactive: 'inactive'
+        inactive: 'inactive',
+        blocked: 'inactive',
+        deleted: 'inactive'
       };
       const publicStatus = statusMap[nextStatus] || 'pending';
 
@@ -509,6 +511,19 @@ class Listing {
     } finally {
       connection.release();
     }
+  }
+
+  static async getInterestedUsers(listingId) {
+    const [rows] = await pool.query(
+      `SELECT u.id, u.full_name, u.phone, u.email 
+       FROM listing_likes ll
+       JOIN users u ON ll.user_id = u.id
+       JOIN listings l ON ll.listing_id = l.id
+       WHERE ll.listing_id = ? AND u.id != l.seller_id
+       LIMIT 10`,
+      [listingId]
+    );
+    return rows;
   }
 }
 

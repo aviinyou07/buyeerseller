@@ -116,7 +116,7 @@ const ListingCard = ({ listing, onClick, onEdit }) => {
           src={listing.image}
         />
       ) : (
-        <div className="grid h-full place-items-center text-[#4d49b9]">
+        <div className="grid h-full place-items-center text-indigo-600">
           <PackageOpen className="size-8" />
         </div>
       )}
@@ -125,7 +125,7 @@ const ListingCard = ({ listing, onClick, onEdit }) => {
     <div className="min-w-0 p-3">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h2 className="truncate text-sm font-black text-[#102a43]">
+          <h2 className="truncate text-sm font-black text-[slate-900]">
             {listing.title}
           </h2>
           <p className="mt-1 truncate text-xs font-semibold text-slate-500">
@@ -138,7 +138,7 @@ const ListingCard = ({ listing, onClick, onEdit }) => {
         <div className="flex shrink-0 items-center gap-1">
           <button
             aria-label={`Edit ${listing.title}`}
-            className="grid size-7 place-items-center rounded-full bg-[#f1efff] text-[#4d49b9] active:scale-95"
+            className="grid size-7 place-items-center rounded-full bg-indigo-50 text-indigo-600 active:scale-95"
             type="button"
             onClick={(event) => {
               event.stopPropagation()
@@ -147,14 +147,14 @@ const ListingCard = ({ listing, onClick, onEdit }) => {
           >
             <Pencil className="size-3.5" />
           </button>
-          <span className="rounded-full bg-[#f1efff] px-2 py-1 text-[10px] font-black text-[#4d49b9]">
+          <span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-black text-indigo-600">
             {translateListingText(listing.status || 'Active', t)}
           </span>
         </div>
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2">
-        <span className="text-base font-black text-[#102a43]">
+        <span className="text-base font-black text-[slate-900]">
           {formatCurrency(listing.price)}
         </span>
         <span className="text-[11px] font-bold text-slate-400">
@@ -245,7 +245,7 @@ const Sell = () => {
   }
 
   return (
-    <div className="min-h-dvh bg-[#f7fafc] text-[#102a43]">
+    <div className="min-h-dvh bg-transparent text-[slate-900]">
       <header className="sticky top-0 z-20 bg-white px-3 pb-3 pt-3">
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center justify-between gap-3">
@@ -259,7 +259,7 @@ const Sell = () => {
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <button
-                className="flex h-8 rounded-sm items-center justify-center gap-2 bg-[#7f7db6] px-3 text-sm font-black text-white"
+                className="flex h-8 rounded-md items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-sm font-black text-white shadow-sm shadow-indigo-200 transition hover:opacity-90 active:scale-95"
                 type="button"
                 onClick={() => navigate('/sell/new')}
               >
@@ -283,7 +283,7 @@ const Sell = () => {
               <button
                 className={`relative h-8 shrink-0 px-2.5 text-xs font-black ${
                   activeTab === tab
-                    ? 'text-[#736fdf]'
+                    ? 'text-indigo-600'
                     : 'text-slate-500'
                 }`}
                 key={tab}
@@ -292,7 +292,7 @@ const Sell = () => {
               >
                 {t(tab.toLowerCase())} ({count})
                 {activeTab === tab && (
-                  <span className="absolute inset-x-2.5 bottom-0 h-1 bg-[#8784e2]" />
+                  <span className="absolute inset-x-2.5 bottom-0 h-1 bg-indigo-600" />
                 )}
               </button>
             )
@@ -302,14 +302,14 @@ const Sell = () => {
         {isLoading ? (
           <section className="bg-white px-4 py-12 text-center ring-1 ring-slate-100">
             <PackageOpen className="mx-auto size-10 text-slate-300" />
-            <h2 className="mt-3 text-base font-black text-[#102a43]">
+            <h2 className="mt-3 text-base font-black text-[slate-900]">
               Loading listings...
             </h2>
           </section>
         ) : errorMessage ? (
           <section className="bg-white px-4 py-12 text-center ring-1 ring-slate-100">
             <PackageOpen className="mx-auto size-10 text-slate-300" />
-            <h2 className="mt-3 text-base font-black text-[#102a43]">
+            <h2 className="mt-3 text-base font-black text-[slate-900]">
               {errorMessage}
             </h2>
           </section>
@@ -328,14 +328,14 @@ const Sell = () => {
         ) : (
           <section className="bg-white px-4 py-12 text-center ring-1 ring-slate-100">
             <PackageOpen className="mx-auto size-10 text-slate-300" />
-            <h2 className="mt-3 text-base font-black text-[#102a43]">
+            <h2 className="mt-3 text-base font-black text-[slate-900]">
               {t('noListingsStatus', { status: t(activeTab.toLowerCase()) })}
             </h2>
             <p className="mx-auto mt-1 max-w-sm text-xs font-semibold leading-5 text-slate-500">
               {t('adminStatusMessage')}
             </p>
             <button
-              className="mt-5 inline-flex h-9 rounded-sm items-center justify-center gap-2 bg-[#8b88f1] px-3 text-sm font-black text-white"
+              className="mt-5 inline-flex h-9 rounded-md items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-sm font-black text-white shadow-sm shadow-indigo-200 transition hover:opacity-90 active:scale-95"
               type="button"
               onClick={() => navigate('/sell/new')}
             >

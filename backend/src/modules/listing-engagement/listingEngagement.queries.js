@@ -58,6 +58,20 @@ await pool.query(`
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 `);
 
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS listing_interactions (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    listing_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    interaction_type ENUM('call', 'chat') NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY unique_user_interaction (listing_id, user_id, interaction_type),
+    KEY listing_interactions_listing_id_idx (listing_id),
+    KEY listing_interactions_user_id_idx (user_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`);
+
 schemaReady = true;
 }
 
@@ -240,4 +254,20 @@ export async function recordListingView({ listingId, userId = null }) {
   } finally {
     connection.release();
   }
+}
+
+export async function addListingInteraction(listingId, userId, interactionType) {
+  await ensureEngagementTables();
+  
+  if (!['call', 'chat'].includes(interactionType)) {
+    throw new Error('Invalid interaction type');
+  }
+  
+  // Use INSERT IGNORE to silently handle duplicate interaction requests from the same user for the same listing
+  const [result] = await pool.query(
+    'INSERT IGNORE INTO listing_interactions (listing_id, user_id, interaction_type) VALUES (?, ?, ?)',
+    [listingId, userId, interactionType]
+  );
+  
+  return result;
 }

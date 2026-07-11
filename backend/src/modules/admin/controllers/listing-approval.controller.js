@@ -128,6 +128,9 @@ const getApprovalDetails = async (req, res) => {
     // 4. Fetch approval logs
     const approvals = await ListingApprovalHistory.findByListing(id);
 
+    // 5. Fetch interested users
+    const interested_customers = await Listing.getInterestedUsers(id);
+
     // Process output
     const details = {
       id: listing.id,
@@ -164,7 +167,8 @@ const getApprovalDetails = async (req, res) => {
         remarks: app.remarks,
         created_at: app.created_at,
         admin: { full_name: app.admin_name }
-      }))
+      })),
+      interested_customers
     };
 
     return success(res, 'Listing details retrieved', details);
@@ -183,8 +187,8 @@ const moderateListing = async (req, res) => {
   const { id } = req.params;
   const { action, remarks = '' } = req.body;
 
-  if (!['approved', 'rejected', 'changes_requested'].includes(action)) {
-    return error(res, "Invalid action. Must be 'approved', 'rejected', or 'changes_requested'.", 400);
+  if (!['approved', 'rejected', 'changes_requested', 'blocked', 'removed'].includes(action)) {
+    return error(res, "Invalid action. Must be 'approved', 'rejected', 'changes_requested', 'blocked', or 'removed'.", 400);
   }
 
   try {
@@ -203,6 +207,12 @@ const moderateListing = async (req, res) => {
     } else if (action === 'rejected') {
       nextStatus = 'rejected';
       historyAction = 'rejected';
+    } else if (action === 'blocked') {
+      nextStatus = 'blocked';
+      historyAction = 'blocked';
+    } else if (action === 'removed') {
+      nextStatus = 'deleted';
+      historyAction = 'removed';
     } else { // changes_requested
       nextStatus = 'draft';
       historyAction = 'rejected';

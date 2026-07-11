@@ -151,7 +151,7 @@ const SchemeCard = ({ scheme }) => {
         {schemeText.category}
       </span>
       <button
-        className="h-9 bg-[#4d49b9] px-4 text-xs font-black text-white"
+        className="h-10 rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-black text-white shadow-sm shadow-indigo-200 transition hover:opacity-90 active:scale-95"
         type="button"
         onClick={openSchemeLink}
       >
@@ -223,7 +223,7 @@ const History = () => {
       <header className="sticky top-0 z-20 border-b border-slate-100 bg-white px-3 pb-3 pt-3">
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#f1efff] text-[#4d49b9]">
+            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm">
               <Building2 className="size-5" />
             </span>
             <div className="min-w-0">
@@ -240,8 +240,8 @@ const History = () => {
 
       <main className="mx-auto max-w-5xl space-y-3 px-3 pt-3">
         <section className="grid grid-cols-2 gap-2 sm:grid-cols-2">
-          <div className="bg-white p-3 ring-1 ring-slate-100">
-            <FileCheck2 className="size-5 text-[#4d49b9]" />
+          <div className="bg-white p-3 ring-1 ring-slate-100 rounded-xl shadow-sm">
+            <FileCheck2 className="size-5 text-indigo-600" />
             <p className="mt-2 text-lg font-black">{schemes.length}</p>
             <p className="text-xs font-bold text-slate-500">{t('totalSchemes')}</p>
           </div>

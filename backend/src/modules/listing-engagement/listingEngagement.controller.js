@@ -6,6 +6,7 @@ import {
   listComments,
   listReviews,
   toggleLike,
+  addListingInteraction
 } from './listingEngagement.queries.js';
 
 function getUserFromToken(req) {
@@ -134,6 +135,30 @@ export async function postListingComment(req, res) {
     return res.status(201).json({ success: true, comment: createdComment });
   } catch (error) {
     console.error('[listingEngagement.postListingComment]', error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
+export async function recordInteraction(req, res) {
+  const user = requireAuth(req, res);
+  if (!user) return;
+
+  try {
+    const listingId = getListingId(req);
+    const { type } = req.body; // 'call' or 'chat'
+
+    if (!listingId) {
+      return res.status(400).json({ success: false, message: 'Valid listing id is required.' });
+    }
+    
+    if (!type || !['call', 'chat'].includes(type)) {
+      return res.status(400).json({ success: false, message: 'Valid interaction type (call/chat) is required.' });
+    }
+
+    await addListingInteraction(listingId, user.id, type);
+    return res.json({ success: true, message: 'Interaction recorded.' });
+  } catch (error) {
+    console.error('[listingEngagement.recordInteraction]', error);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 }

@@ -64,6 +64,7 @@ export const normalizeProduct = (product = {}) => {
     originalImage: getApiAssetUrl(product.primary_photo || product.image || photos[0] || ''),
     thumbnailImage: image,
     sellerName: product.seller_name || product.sellerName || '',
+    sellerId: product.seller_id || product.sellerId || product.user_id || product.userId || '',
     contactNumber: product.seller_phone || product.contactNumber || '',
     postedAt: product.created_at
       ? new Date(product.created_at).toLocaleDateString('en-IN', {
@@ -99,13 +100,27 @@ export const getProduct = async (productId) => {
 }
 
 export const createProduct = async (formData) => {
-  const response = await axiosClient.post('/listings', formData)
+  const response = await axiosClient.post('/listings', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
 
   return response.data
 }
 
 export const updateProduct = async (productId, formData) => {
-  const response = await axiosClient.put(`/listings/${productId}`, formData)
+  const response = await axiosClient.put(`/listings/${productId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
 
+  return response.data
+}
+
+export const getListingInterestedUsers = async (productId) => {
+  const response = await axiosClient.get(`/listings/${productId}/interested-users`)
+  return response.data
+}
+
+export const recordListingInteraction = async (productId, type) => {
+  const response = await axiosClient.post(`/engagement/${productId}/interact`, { type })
   return response.data
 }

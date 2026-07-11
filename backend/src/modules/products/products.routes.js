@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getlistings, getProduct, postProduct, putProduct, uploadMiddleware } from './products.controller.js';
+import { getlistings, getProduct, postProduct, putProduct, uploadMiddleware, getInterestedUsers } from './products.controller.js';
 
 const router = Router();
 
@@ -8,6 +8,9 @@ router.get('/', getlistings);
 
 // GET /api/listings/:id
 router.get('/:id', getProduct);
+
+// GET /api/listings/:id/interested-users
+router.get('/:id/interested-users', getInterestedUsers);
 
 // POST /api/listings  (multipart/form-data with optional photos[])
 router.post('/', uploadMiddleware, postProduct);

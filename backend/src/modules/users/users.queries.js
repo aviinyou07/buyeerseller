@@ -126,3 +126,55 @@ export async function updateSellerProfileByUserId(userId, { business_name, gst_n
     );
   }
 }
+
+/**
+ * Calculate dynamic reward points for a user
+ */
+export async function getUserRewardPoints(userId) {
+  try {
+    // 5 points per like received on their listings
+    const [[{ likesCount }]] = await pool.query(
+      `SELECT COUNT(*) AS likesCount 
+       FROM listing_likes ll 
+       JOIN listings l ON ll.listing_id = l.id 
+       WHERE l.seller_id = ?`,
+      [userId]
+    );
+    
+    // 2 points per view on their listings
+    const [[{ viewsCount }]] = await pool.query(
+      `SELECT SUM(views_count) AS viewsCount 
+       FROM listings 
+       WHERE seller_id = ?`,
+      [userId]
+    );
+    
+    // 15 points per approved listing
+    const [[{ listingsCount }]] = await pool.query(
+      `SELECT COUNT(*) AS listingsCount 
+       FROM listings 
+       WHERE seller_id = ? AND listing_status = 'approved'`,
+      [userId]
+    );
+
+    // 10 points per interaction (call/chat) received on their listings
+    const [[{ interactionsCount }]] = await pool.query(
+      `SELECT COUNT(DISTINCT li.user_id, li.interaction_type) AS interactionsCount 
+       FROM listing_interactions li 
+       JOIN listings l ON li.listing_id = l.id 
+       WHERE l.seller_id = ?`,
+      [userId]
+    );
+    
+    const points = (Number(likesCount || 0) * 5) + 
+                   (Number(viewsCount || 0) * 2) + 
+                   (Number(listingsCount || 0) * 15) +
+                   (Number(interactionsCount || 0) * 10);
+                   
+    // Start with a base of 100 points
+    return 100 + points;
+  } catch (err) {
+    console.error('Error calculating reward points:', err);
+    return 100; // Base score on error
+  }
+}

@@ -8,6 +8,7 @@ import {
   createProduct,
   updateProduct,
   getSubcategoryBySlug,
+  fetchInterestedUsers
 } from './products.queries.js';
 import { createProductImageVariants } from '../../utils/productImages.js';
 import { recordListingView } from '../listing-engagement/listingEngagement.queries.js';
@@ -253,6 +254,32 @@ export async function putProduct(req, res) {
     return res.json({ success: true, message: 'Listing updated successfully.' });
   } catch (error) {
     console.error('[listings.putProduct]', error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
+/**
+ * GET /api/listings/:id/interested-users
+ */
+export async function getInterestedUsers(req, res) {
+  try {
+    const user = getUserFromToken(req);
+    if (user?.error || !user) return res.status(401).json({ success: false, message: 'Authentication required.' });
+
+    const productId = Number(req.params.id);
+    if (!productId) return res.status(400).json({ success: false, message: 'Valid product id required.' });
+
+    const product = await getProductById(productId);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
+
+    if (product.seller_id !== user.id) {
+      return res.status(403).json({ success: false, message: 'Forbidden. Only the seller can view this.' });
+    }
+
+    const interestedUsers = await fetchInterestedUsers(productId);
+    return res.json({ success: true, interestedUsers });
+  } catch (error) {
+    console.error('[products.getInterestedUsers]', error);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 }

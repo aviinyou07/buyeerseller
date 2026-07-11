@@ -8,7 +8,7 @@ import {
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { getlistings, normalizeProduct } from '../api/productsApi'
 import { useAppText } from '../appText'
-import { readJSON, writeJSON } from '../services/marketplaceData'
+import { clearUserListings, getCurrentUser, isAuthenticated, readJSON, writeJSON } from '../services/marketplaceData'
 
 const subcategoryNames = {
   mobile: 'Mobiles',
@@ -183,7 +183,13 @@ const listingsearch = () => {
           .map(normalizeProduct)
 
         if (isMounted) {
-          setlistings(nextlistings)
+          const isAuth = isAuthenticated();
+          const user = isAuth ? getCurrentUser() : null;
+          let filteredListings = nextlistings;
+          if (user) {
+            filteredListings = filteredListings.filter(item => String(item.sellerId) !== String(user.id));
+          }
+          setlistings(filteredListings)
         }
       } catch (error) {
         console.error('[listingsearch.loadlistings]', error)

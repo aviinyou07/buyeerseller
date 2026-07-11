@@ -156,6 +156,32 @@ const ProductCardSkeleton = () => (
   </div>
 );
 
+const playTingSound = () => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioContext();
+    
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  } catch (e) {
+    console.error("Audio playback failed", e);
+  }
+};
+
 const ProductCard = ({
   product,
   isWishlisted,
@@ -165,6 +191,8 @@ const ProductCard = ({
   onWishlistToggle,
 }) => {
   const { t } = useAppText();
+  const [likeAnimating, setLikeAnimating] = useState(false);
+  const [bubbles, setBubbles] = useState([]);
   const meta = getCardMeta(product);
   const isLiked = Boolean(meta.isLiked);
   const likesCount = meta.likes;
@@ -187,6 +215,27 @@ const ProductCard = ({
       0,
       likesCount + (nextIsLiked ? 1 : -1),
     );
+
+    if (nextIsLiked) {
+      setLikeAnimating(true);
+      playTingSound();
+      const newBubbles = Array.from({ length: 5 }).map((_, i) => ({
+        id: Date.now() + i,
+        tx: (Math.random() - 0.5) * 60,
+        ty: -Math.random() * 60 - 20,
+        scale: Math.random() * 0.5 + 0.5,
+        rot: (Math.random() - 0.5) * 45,
+      }));
+      setBubbles(prev => [...prev, ...newBubbles]);
+      
+      setTimeout(() => {
+        setLikeAnimating(false);
+      }, 300);
+      
+      setTimeout(() => {
+        setBubbles(prev => prev.filter(b => !newBubbles.find(nb => nb.id === b.id)));
+      }, 1000);
+    }
 
     onLikeChange(product.id, {
       isLiked: nextIsLiked,
@@ -239,7 +288,7 @@ const ProductCard = ({
         )}
 
         {meta.offerBadge && (
-          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black text-[#102a43] shadow-sm">
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black text-[slate-900] shadow-sm">
             <Tag className="size-2.5" />
             {translateProductText(meta.offerBadge, t)}
           </span>
@@ -251,7 +300,7 @@ const ProductCard = ({
         <div className="min-w-0">
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
-              <h2 className="line-clamp-2 text-sm font-black leading-5 tracking-normal text-[#101828]">
+              <h2 className="line-clamp-2 text-sm font-black leading-5 tracking-normal text-[#101828] w-full">
                 {product.title}
               </h2>
               {meta.companyName && (
@@ -259,40 +308,6 @@ const ProductCard = ({
                   {meta.companyName}
                 </p>
               )}
-            </div>
-
-            <div className="flex shrink-0 items-center gap-1.5">
-              <button
-                aria-label={
-                  isWishlisted ? "Remove from wishlist" : "Add to wishlist"
-                }
-                className={`grid size-8 place-items-center rounded-full transition ${
-                  isWishlisted
-                    ? "bg-rose-50 text-rose-500"
-                    : "bg-white text-slate-500 ring-1 ring-slate-200 hover:text-rose-500"
-                }`}
-                type="button"
-                onClick={handleWishlistClick}
-              >
-                <Heart
-                  className={`size-4 ${isWishlisted ? "fill-rose-500" : ""}`}
-                />
-              </button>
-              <button
-                aria-label={isLiked ? "Unlike product" : t("likeProduct")}
-                className={`inline-flex h-8 items-center gap-1 rounded-full px-2 text-xs font-black transition ${
-                  isLiked
-                    ? "bg-[#f1efff] text-[#4d49b9]"
-                    : "bg-white text-slate-500 ring-1 ring-slate-200 hover:text-[#4d49b9]"
-                }`}
-                type="button"
-                onClick={handleLikeClick}
-              >
-                <ThumbsUp
-                  className={`size-4 ${isLiked ? "fill-[#4d49b9]" : ""}`}
-                />
-                <span>{likesCount}</span>
-              </button>
             </div>
           </div>
 
@@ -331,7 +346,7 @@ const ProductCard = ({
 
             <span className="text-slate-300">•</span>
 
-            <span className="font-black text-[#102a43]">
+            <span className="font-black text-[slate-900]">
               {translateProductText(product.condition || "Good Condition", t)}
             </span>
           </div>
@@ -353,14 +368,64 @@ const ProductCard = ({
 
         <div className=" flex items-center justify-between gap-2 pt-3">
           <div className="min-w-0">
-            <span className="block text-md font-black leading-none text-[#102a43]">
+            <span className="block text-md font-black leading-none text-[slate-900]">
               {formatPrice(product.price)}
             </span>
           </div>
 
-          <span className="shrink-0 rounded-md bg-[#7f7db6] px-3 py-1.5 text-xs font-black text-white">
-            {t("view")}
-          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              aria-label={
+                isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+              }
+              className={`grid size-8 place-items-center rounded-full transition ${
+                isWishlisted
+                  ? "bg-rose-50 text-rose-500"
+                  : "bg-white text-slate-500 ring-1 ring-slate-200 hover:text-rose-500"
+              }`}
+              type="button"
+              onClick={handleWishlistClick}
+            >
+              <Heart
+                className={`size-4 ${isWishlisted ? "fill-rose-500" : ""}`}
+              />
+            </button>
+            <div className="relative">
+              {bubbles.map(bubble => (
+                <div
+                  key={bubble.id}
+                  className="absolute pointer-events-none animate-bubble text-indigo-600 z-50"
+                  style={{
+                    left: '50%',
+                    top: '50%',
+                    '--tx': `${bubble.tx}px`,
+                    '--ty': `${bubble.ty}px`,
+                    '--rot': `${bubble.rot}deg`,
+                    '--scale': bubble.scale,
+                    marginLeft: '-10px',
+                    marginTop: '-10px',
+                  }}
+                >
+                  <ThumbsUp size={20} className="fill-indigo-600" />
+                </div>
+              ))}
+              <button
+                aria-label={isLiked ? "Unlike product" : t("likeProduct")}
+                className={`inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-black transition ${
+                  isLiked
+                    ? "bg-indigo-50 text-indigo-600"
+                    : "bg-white text-slate-500 ring-1 ring-slate-200 hover:text-indigo-600"
+                } ${likeAnimating ? "animate-pop" : ""}`}
+                type="button"
+                onClick={handleLikeClick}
+              >
+                <ThumbsUp
+                  className={`size-4 ${isLiked ? "fill-indigo-600" : ""}`}
+                />
+                <span>{likesCount}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -442,16 +507,25 @@ const SubcategoryListing = () => {
           ),
           isAuthenticated() ? getWishlistFromApi().catch(() => null) : null,
         ]);
-        const nextlistings = (
-          response.listings ||
-          response.data?.listings ||
-          []
-        ).map(normalizeProduct);
+
         const nextWishlist =
           wishlistResponse?.wishlist || wishlistResponse?.data?.wishlist || [];
 
         if (isMounted) {
-          setlistings(nextlistings);
+          const { isAuthenticated, getCurrentUser } = await import("../services/marketplaceData");
+          const isAuth = isAuthenticated();
+          const user = isAuth ? getCurrentUser() : null;
+          let nextListings = (
+            response.listings ||
+            response.data?.listings ||
+            []
+          ).map(normalizeProduct);
+          
+          if (user) {
+            nextListings = nextListings.filter(item => String(item.sellerId) !== String(user.id));
+          }
+          
+          setlistings(nextListings);
           setWishlistIds(
             new Set(
               nextWishlist.map((item) => String(item.product_id || item.id)),
@@ -560,7 +634,7 @@ const SubcategoryListing = () => {
   };
 
   return (
-    <div className="min-h-dvh bg-[#f7fafc] text-[#102a43]">
+    <div className="min-h-dvh bg-[#f7fafc] text-[slate-900]">
       <header className="sticky top-0 z-30 overflow-hidden border-b border-white/80 bg-gradient-to-br from-[#ffffff] via-[#f1efff] to-[#e6e4ff] px-3 pb-4 pt-3">
         <div className="pointer-events-none absolute -right-12 -top-16 size-40 rounded-full bg-white/55" />
         <div className="pointer-events-none absolute -left-14 bottom-[-4.5rem] size-36 rounded-full bg-[#8f8cf5]/16" />
@@ -568,7 +642,7 @@ const SubcategoryListing = () => {
           <div className="flex items-center gap-3">
             <button
               aria-label={t("back")}
-              className="grid size-10 shrink-0 place-items-center rounded-full border border-white/90 bg-white text-[#102a43] shadow-sm shadow-[#8f8cf5]/10 transition active:scale-95"
+              className="grid size-10 shrink-0 place-items-center rounded-full border border-white/90 bg-white text-[slate-900] shadow-sm shadow-[#8f8cf5]/10 transition active:scale-95"
               type="button"
               onClick={() => navigate("/buy")}
             >
@@ -578,7 +652,7 @@ const SubcategoryListing = () => {
               <h1 className="text-lg font-black tracking-normal">
                 {t("searchMarketplace")}
               </h1>
-              <p className="text-xs font-semibold text-[#102a43]/58">
+              <p className="text-xs font-semibold text-[slate-900]/58">
                 {t("showingCategory", { category: selectedTitle })}
               </p>
             </div>
@@ -600,11 +674,35 @@ const SubcategoryListing = () => {
           >
             <Search className="size-5 shrink-0 text-slate-500" />
             <span className="min-w-0 flex-1 text-sm font-semibold text-slate-400">
-              {query
-                ? [query, location].filter(Boolean).join(t("inSeparator"))
-                : t("searchInCategory", { category: selectedTitle })}
+              {t("searchInCategory", { category: selectedTitle })}
             </span>
           </button>
+          
+          {(query || location) && (
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {query && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200">
+                    <Search className="size-3.5 text-indigo-500" />
+                    {query}
+                  </span>
+                )}
+                {location && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200">
+                    <MapPin className="size-3.5 text-indigo-500" />
+                    {location}
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                className="shrink-0 inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-slate-600 transition hover:bg-slate-200 active:scale-95"
+                onClick={() => navigate(`/categories/${categoryId}/${subcategoryId}`)}
+              >
+                Reset
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -618,9 +716,9 @@ const SubcategoryListing = () => {
 
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-black text-[#102a43]">
-                {t("listingsCount", { count: filteredlistings.length })}
-              </h2>
+              <p className="text-base font-black tracking-normal text-[#101828]">
+                {filteredlistings.length} {t("Products", { defaultValue: "Products" })}
+              </p>
               <p className="mt-0.5 text-xs font-semibold text-slate-500">
                 {query || location
                   ? t("resultsIn", { category: selectedTitle })

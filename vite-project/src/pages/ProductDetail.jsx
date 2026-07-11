@@ -25,7 +25,7 @@ import {
   postListingReview,
   toggleListingLike,
 } from '../api/listingEngagementApi'
-import { getProduct } from '../api/productsApi'
+import { getProduct, recordListingInteraction } from '../api/productsApi'
 import { useAppText } from '../appText'
 import { getCurrentUser, isAuthenticated } from '../services/marketplaceData'
 
@@ -89,6 +89,7 @@ const normalizeBackendProduct = (apiProduct) => {
     image: primaryImage || photos[0] || '',
     images: photos,
     sellerName: apiProduct.seller_name || '',
+    sellerId: apiProduct.seller_id || apiProduct.sellerId || apiProduct.user_id || apiProduct.userId || '',
     sellerRating: Number(apiProduct.seller_rating || 0),
     contactNumber: apiProduct.seller_phone || '',
     postedAt: formatPostedAt(apiProduct.created_at),
@@ -197,6 +198,31 @@ const detailTextKeys = {
 }
 
 const translateDetailText = (value, t) => t(detailTextKeys[value] || value)
+
+const playTingSound = () => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime); 
+    osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1); 
+    
+    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  } catch (e) {
+    console.log("Audio not supported", e);
+  }
+};
 
 const formatReviewDate = (createdAt) => {
   if (!createdAt) return 'Just now'
@@ -352,12 +378,12 @@ const getOverviewFields = (product) => {
 }
 
 const ProductDetailSkeleton = ({ t, categoryTitle, onBack }) => (
-  <div className="min-h-dvh bg-[#f7fafc] text-[#102a43]">
+  <div className="min-h-dvh bg-[#f7fafc] text-[slate-900]">
     <header className="sticky top-0 z-30 overflow-hidden  bg-white px-3 pb-4 pt-3">
       <div className="relative mx-auto flex max-w-5xl items-center gap-3">
         <button
           aria-label={t('back')}
-          className="grid size-10 shrink-0 place-items-center rounded-full border border-white/90 bg-white text-[#102a43] "
+          className="grid size-10 shrink-0 place-items-center rounded-full border border-white/90 bg-white text-[slate-900] "
           type="button"
           onClick={onBack}
         >
@@ -367,7 +393,7 @@ const ProductDetailSkeleton = ({ t, categoryTitle, onBack }) => (
           <h1 className="truncate text-lg font-black tracking-normal">
             {t('productDetails')}
           </h1>
-          <p className="text-xs font-semibold text-[#102a43]/58">
+          <p className="text-xs font-semibold text-[slate-900]/58">
             {t('buyerViewFor', { category: categoryTitle })}
           </p>
         </div>
@@ -492,12 +518,15 @@ const ProductDetail = () => {
   const [reviewMessage, setReviewMessage] = useState('')
   const [isReviewPosting, setIsReviewPosting] = useState(false)
   const [isLikePending, setIsLikePending] = useState(false)
+  const [likeAnimating, setLikeAnimating] = useState(false)
+  const [bubbles, setBubbles] = useState([])
   const [engagementStats, setEngagementStats] = useState({
     likesCount: 0,
     isLiked: false,
     commentsCount: 0,
     viewsCount: 0,
   })
+  const [interestedUsers, setInterestedUsers] = useState([])
   const lastImageTapRef = useRef(0)
   const contactActionHandledRef = useRef(false)
   const currentUser = useMemo(() => getCurrentUser(), [])
@@ -518,8 +547,30 @@ const ProductDetail = () => {
   }, [product?.avgRating, reviews])
   
   const isProductActive = product?.status === 'active' || product?.listing_status === 'approved'
+  const isOwner = Boolean(currentUserId && product?.sellerId && String(product.sellerId) === currentUserId)
   
-  const listingstats = [
+  const listingstats = isOwner ? [
+    {
+      label: 'Views',
+      value: formatStatCount(engagementStats.viewsCount || product?.viewsCount),
+      icon: Eye,
+    },
+    {
+      label: 'Interactions',
+      value: formatStatCount((engagementStats.likesCount || 0) + (reviews.length || 0)),
+      icon: ThumbsUp,
+    },
+    {
+      label: 'Connections',
+      value: '0',
+      icon: MessageCircle,
+    },
+    {
+      label: 'Rating',
+      value: averageRating > 0 ? averageRating.toFixed(1) : 'New',
+      icon: Star,
+    },
+  ] : [
     {
       label: 'Views',
       value: formatStatCount(engagementStats.viewsCount || product?.viewsCount),
@@ -590,8 +641,21 @@ const ProductDetail = () => {
         const backendProduct = response.product || response.data?.product || response.data
 
         if (isMounted && backendProduct) {
-          setProduct(normalizeBackendProduct(backendProduct))
+          const normalized = normalizeBackendProduct(backendProduct)
+          setProduct(normalized)
           setReviews((engagement.reviews || []).map(normalizeReview))
+          
+          if (currentUserId && normalized.sellerId && String(normalized.sellerId) === String(currentUserId)) {
+            import('../api/productsApi').then(({ getListingInterestedUsers }) => {
+              getListingInterestedUsers(productId)
+                .then(res => {
+                  if (res && res.interestedUsers && isMounted) {
+                    setInterestedUsers(res.interestedUsers)
+                  }
+                })
+                .catch(e => console.error('[ProductDetail.loadInterestedUsers]', e))
+            })
+          }
           setEngagementStats({
             likesCount: Number(engagement.likesCount ?? backendProduct.likes_count ?? 0),
             isLiked: Boolean(engagement.isLiked || backendProduct.is_liked),
@@ -644,6 +708,23 @@ const ProductDetail = () => {
       0,
       Number(previousStats.likesCount ?? product?.likesCount ?? 0) + (nextIsLiked ? 1 : -1),
     )
+
+    if (nextIsLiked) {
+      setLikeAnimating(true);
+      playTingSound();
+      
+      const newBubbles = Array.from({ length: 6 }).map((_, i) => ({
+        id: Date.now() + i,
+        x: (Math.random() - 0.5) * 60,
+        y: (Math.random() - 0.5) * 20,
+        size: Math.random() * 10 + 12,
+        delay: Math.random() * 200,
+      }));
+      setBubbles((prev) => [...prev, ...newBubbles]);
+      
+      setTimeout(() => setLikeAnimating(false), 300);
+      setTimeout(() => setBubbles([]), 1200);
+    }
 
     setIsLikePending(true)
     setEngagementStats((currentStats) => ({
@@ -762,13 +843,23 @@ const ProductDetail = () => {
     return true
   }
 
-  const handleChatClick = () => {
+  const handleChatClick = async () => {
     if (!requireLoginForContact('chat')) return
+    try {
+      await recordListingInteraction(productId, 'chat')
+    } catch (err) {
+      console.error('Failed to record chat interaction', err)
+    }
     window.open(chatUrl, '_blank', 'noreferrer')
   }
 
-  const handleCallClick = () => {
+  const handleCallClick = async () => {
     if (!requireLoginForContact('call')) return
+    try {
+      await recordListingInteraction(productId, 'call')
+    } catch (err) {
+      console.error('Failed to record call interaction', err)
+    }
     window.location.href = callUrl
   }
 
@@ -785,14 +876,24 @@ const ProductDetail = () => {
 
     contactActionHandledRef.current = true
 
-    if (contactAction === 'chat') {
-      window.open(chatUrl, '_blank', 'noreferrer')
+    const performContactAction = async () => {
+      try {
+        await recordListingInteraction(productId, contactAction)
+      } catch (err) {
+        console.error(`Failed to record ${contactAction} interaction`, err)
+      }
+
+      if (contactAction === 'chat') {
+        window.open(chatUrl, '_blank', 'noreferrer')
+      }
+
+      if (contactAction === 'call') {
+        window.location.href = callUrl
+      }
     }
 
-    if (contactAction === 'call') {
-      window.location.href = callUrl
-    }
-  }, [callUrl, chatUrl, location.state?.contactAction, sellerPhone])
+    performContactAction()
+  }, [callUrl, chatUrl, location.state?.contactAction, sellerPhone, productId])
 
   if (isLoading) {
     return (
@@ -806,12 +907,12 @@ const ProductDetail = () => {
 
   if (errorMessage || !product) {
     return (
-      <div className="min-h-dvh bg-[#f7fafc] text-[#102a43]">
+      <div className="min-h-dvh bg-[#f7fafc] text-[slate-900]">
         <header className="sticky top-0 z-30 bg-white px-3 pb-4 pt-3">
           <div className="mx-auto flex max-w-5xl items-center gap-3">
             <button
               aria-label={t('back')}
-              className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-[#102a43]"
+              className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-[slate-900]"
               type="button"
               onClick={() => navigate(-1)}
             >
@@ -824,7 +925,7 @@ const ProductDetail = () => {
         </header>
         <main className="mx-auto max-w-5xl px-3 pt-3">
           <section className="border border-slate-100 bg-white px-4 py-12 text-center">
-            <h2 className="text-base font-black text-[#102a43]">
+            <h2 className="text-base font-black text-[slate-900]">
               {errorMessage || 'Product not found.'}
             </h2>
           </section>
@@ -834,12 +935,12 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-dvh bg-[#f7fafc] text-[#102a43]">
+    <div className="min-h-dvh bg-[#f7fafc] text-[slate-900]">
       <header className="sticky top-0 z-30 overflow-hidden  bg-white px-3 pb-4 pt-3">
         <div className="relative mx-auto flex max-w-5xl items-center gap-3">
           <button
             aria-label={t('back')}
-            className="grid size-10 shrink-0 place-items-center rounded-full border border-white/90 bg-white text-[#102a43] "
+            className="grid size-10 shrink-0 place-items-center rounded-full border border-white/90 bg-white text-[slate-900] "
             type="button"
             onClick={() => navigate(-1)}
           >
@@ -849,7 +950,7 @@ const ProductDetail = () => {
             <h1 className="truncate text-lg font-black tracking-normal">
               {t('productDetails')}
             </h1>
-            <p className="text-xs font-semibold text-[#102a43]/58">
+            <p className="text-xs font-semibold text-[slate-900]/58">
               {t('buyerViewFor', { category: categoryTitle })}
             </p>
           </div>
@@ -877,7 +978,7 @@ const ProductDetail = () => {
                   <>
                     <button
                       type="button"
-                      className="absolute left-2 top-1/2 -translate-y-1/2 grid size-8 place-items-center rounded-full bg-white/80 text-[#102a43] shadow-md transition hover:bg-white"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 grid size-8 place-items-center rounded-full bg-white/80 text-[slate-900] shadow-md transition hover:bg-white"
                       onClick={(e) => {
                         e.stopPropagation();
                         const idx = galleryImages.indexOf(activeImage);
@@ -889,7 +990,7 @@ const ProductDetail = () => {
                     </button>
                     <button
                       type="button"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 grid size-8 place-items-center rounded-full bg-white/80 text-[#102a43] shadow-md transition hover:bg-white"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 grid size-8 place-items-center rounded-full bg-white/80 text-[slate-900] shadow-md transition hover:bg-white"
                       onClick={(e) => {
                         e.stopPropagation();
                         const idx = galleryImages.indexOf(activeImage);
@@ -937,14 +1038,14 @@ const ProductDetail = () => {
           </div>
 
           <div className="p-3.5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg font-black leading-6 text-[#102a43]">
+            <div className="flex flex-col gap-1">
+              <div className="w-full">
+                <h2 className="text-[20px] font-black leading-[1.3] tracking-tight text-[#102a43] line-clamp-2">
                   {translatedProductTitle || product.title}
                 </h2>
               </div>
-              <div className="flex shrink-0 flex-col items-end gap-2">
-                <p className="text-right text-2xl font-black text-[#102a43]">
+              <div className="w-full flex justify-end">
+                <p className="text-[26px] font-black text-[#102a43]">
                   {formatPrice(product.price)}
                 </p>
               </div>
@@ -967,23 +1068,41 @@ const ProductDetail = () => {
                   {translateDetailText(product.postedAt, t)}
                 </span>
               </div>
-              {isProductActive && (
-                <button
-                  aria-label={engagementStats.isLiked ? 'Unlike product' : 'Like product'}
-                  className={`inline-flex shrink-0 px-3 py-1.5 items-center gap-2 rounded-full text-xs font-semibold ${
-                    engagementStats.isLiked
-                      ? 'bg-[#4d49b9] text-white'
-                      : 'bg-[#fbfaff] text-[#102a43] ring-1 ring-[#ded2ff]'
-                  }`}
-                  disabled={isLikePending}
-                  type="button"
-                  onClick={handleLikeToggle}
-                >
-                  <ThumbsUp
-                    className={`size-4 ${engagementStats.isLiked ? 'fill-white' : 'text-[#4d49b9]'}`}
-                  />
-                  {formatStatCount(engagementStats.likesCount ?? product?.likesCount)}
-                </button>
+              {isProductActive && !isOwner && (
+                <div className="relative">
+                  <button
+                    aria-label={engagementStats.isLiked ? 'Unlike product' : 'Like product'}
+                    className={`inline-flex shrink-0 px-3 py-1.5 items-center gap-2 rounded-full text-xs font-semibold ${
+                      engagementStats.isLiked
+                        ? 'bg-[#4d49b9] text-white'
+                        : 'bg-[#fbfaff] text-slate-900 ring-1 ring-[#ded2ff]'
+                    } ${likeAnimating ? 'animate-pop' : ''}`}
+                    disabled={isLikePending}
+                    type="button"
+                    onClick={handleLikeToggle}
+                  >
+                    <ThumbsUp
+                      className={`size-4 ${engagementStats.isLiked ? 'fill-white' : 'text-[#4d49b9]'}`}
+                    />
+                    {formatStatCount(engagementStats.likesCount ?? product?.likesCount)}
+                  </button>
+                  
+                  {bubbles.map((bubble) => (
+                    <div
+                      key={bubble.id}
+                      className="absolute pointer-events-none animate-bubble text-[#4d49b9]"
+                      style={{
+                        left: '50%',
+                        top: '50%',
+                        marginLeft: `${bubble.x - bubble.size/2}px`,
+                        marginTop: `${bubble.y - bubble.size/2}px`,
+                        animationDelay: `${bubble.delay}ms`,
+                      }}
+                    >
+                      <ThumbsUp size={bubble.size} className="fill-[#4d49b9]" />
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
@@ -997,10 +1116,10 @@ const ProductDetail = () => {
 
                 return (
                   <div
-                    className="flex min-h-16 min-w-0 flex-col items-center justify-center border border-gray-100 bg-white px-1.5 py-2 text-center  sm:min-h-20 sm:flex-row sm:justify-start sm:gap-3 sm:px-3 sm:text-left"
+                    className="flex min-h-16 min-w-0 flex-col items-center justify-center border border-gray-100 bg-white px-1.5 py-2 text-center sm:min-h-20 sm:flex-row sm:justify-start sm:gap-3 sm:px-3 sm:text-left"
                     key={stat.label}
                   >
-                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#4d49b9] text-white  sm:size-10">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm sm:size-10">
                       <StatIcon className="size-3.5 sm:size-4" strokeWidth={2.5} />
                     </span>
                     <div className="mt-1 min-w-0 sm:mt-0">
@@ -1026,7 +1145,7 @@ const ProductDetail = () => {
                 <p className="text-[11px] font-black uppercase text-slate-400">
                   {translateDetailText(item.label, t)}
                 </p>
-                <p className="mt-1 text-sm font-black text-[#102a43]">
+                <p className="mt-1 text-sm font-black text-[slate-900]">
                   {translateDetailText(item.value, t)}
                 </p>
               </div>
@@ -1061,7 +1180,7 @@ const ProductDetail = () => {
                   <MessageCircle className="size-3" />
                   Buyer feedback
                 </span>
-                <h2 className="mt-2 text-lg font-black tracking-normal text-[#102a43]">
+                <h2 className="mt-2 text-lg font-black tracking-normal text-[slate-900]">
                   Reviews
                 </h2>
                 <p className="mt-1 text-xs font-semibold text-slate-500">
@@ -1073,7 +1192,7 @@ const ProductDetail = () => {
             
             </div>
 
-            {hasReviewedProduct ? (
+            {isOwner ? null : hasReviewedProduct ? (
               <div className="m-3.5 border border-slate-100 bg-white p-3">
                 <p className=" bg-[#f1efff] px-3 py-2 text-sm font-semibold text-[#4d49b9]">
                   You have already reviewed this product.
@@ -1085,7 +1204,7 @@ const ProductDetail = () => {
                 onSubmit={handleReviewSubmit}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-black text-[#102a43]">Rate this listing</p>
+                  <p className="text-sm font-black text-[slate-900]">Rate this listing</p>
                   <div className="flex items-center gap-1 rounded-full bg-[#fbfaff] p-1 ring-1 ring-[#ebe7ff]">
                     {Array.from({ length: 5 }).map((_, index) => {
                       const ratingValue = index + 1
@@ -1114,7 +1233,7 @@ const ProductDetail = () => {
                 </div>
 
                 <textarea
-                  className="mt-3 min-h-32 w-full resize-none rounded-sm border border-slate-200 bg-[#fbfaff] px-4 py-3 text-sm font-semibold leading-6 text-[#102a43] outline-none placeholder:text-slate-400"
+                  className="mt-3 min-h-32 w-full resize-none rounded-sm border border-slate-200 bg-[#fbfaff] px-4 py-3 text-sm font-semibold leading-6 text-[slate-900] outline-none placeholder:text-slate-400"
                   placeholder="Write your review"
                   value={reviewText}
                   onChange={(event) => {
@@ -1132,7 +1251,7 @@ const ProductDetail = () => {
                     />
                     <button
                       aria-label="Remove review image"
-                      className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-white text-[#102a43]"
+                      className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-white text-[slate-900]"
                       type="button"
                       onClick={() => setReviewImagePreview('')}
                     >
@@ -1149,7 +1268,7 @@ const ProductDetail = () => {
 
                 <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
                   <button
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#4d49b9] px-5 text-sm font-black text-white"
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-5 text-sm font-black text-white shadow-sm shadow-indigo-200 transition hover:opacity-90 active:scale-95"
                     disabled={isReviewPosting || !reviewText.trim()}
                     type="submit"
                   >
@@ -1174,7 +1293,7 @@ const ProductDetail = () => {
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div>
-                            <h3 className="text-sm font-black text-[#102a43]">
+                            <h3 className="text-sm font-black text-[slate-900]">
                               {review.name}
                             </h3>
                             <p className="text-xs font-semibold text-slate-500">
@@ -1202,7 +1321,7 @@ const ProductDetail = () => {
                 ))
               ) : (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-[#fbfaff] px-4 py-8 text-center">
-                  <p className="text-sm font-black text-[#102a43]">No reviews yet.</p>
+                  <p className="text-sm font-black text-[slate-900]">No reviews yet.</p>
                   <p className="mt-1 text-xs font-semibold text-slate-500">
                     Be the first buyer to share feedback.
                   </p>
@@ -1232,53 +1351,93 @@ const ProductDetail = () => {
           </section>
         )}
 
-        <section className="border border-slate-100 bg-white p-3.5">
-          <div className="flex items-center gap-3">
-            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#f1efff] text-[#4d49b9]">
-              <UserRound className="size-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-black uppercase tracking-wide text-[#4d49b9]">
-                Seller details
-              </p>
-              <h2 className="truncate text-sm font-black text-[#102a43]">
-                {product.sellerName || t('localSeller')}
+        {isOwner && interestedUsers.length > 0 && (
+          <section className="mt-4 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+            <div className="border-b border-slate-100 bg-[#fbfaff] px-4 py-3.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-600 ring-1 ring-indigo-100">
+                <UserRound className="size-3" />
+                Interested Customers
+              </span>
+              <h2 className="mt-2 text-lg font-black tracking-normal text-slate-900">
+                Connected Buyers
               </h2>
               <p className="mt-1 text-xs font-semibold text-slate-500">
-                {t('repliesWithinHour')}
+                These customers have shown interest in your listing.
               </p>
             </div>
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#4d49b9] px-3 py-1.5 text-xs font-black text-white">
-              {product.sellerRating > 0 ? product.sellerRating.toFixed(1) : 'New'}
-              <Star className="size-3 fill-white" />
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#f1efff] px-2.5 py-1 text-[10px] font-black text-[#4d49b9]">
-              <ShieldCheck className="size-3" />
-              {t('safe')}
-            </span>
-          </div>
-
-          {sellerPhone && (
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <button
-                className="flex h-11 items-center justify-center gap-2 bg-[#fbfaff] text-sm font-black text-[#4d49b9] ring-1 ring-[#ded2ff] active:scale-[0.99]"
-                type="button"
-                onClick={handleChatClick}
-              >
-                <MessageCircle className="size-4" />
-                {t('chat')}
-              </button>
-              <button
-                className="flex h-11 items-center justify-center gap-2 bg-[#7f7db6] text-sm font-black text-white active:scale-[0.99]"
-                type="button"
-                onClick={handleCallClick}
-              >
-                <Phone className="size-4" />
-                {t('callSeller')}
-              </button>
+            <div className="divide-y divide-slate-100">
+              {interestedUsers.map((u) => (
+                <div className="flex items-center gap-3 p-4 hover:bg-slate-50 transition" key={u.id}>
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-slate-100 text-indigo-500 ring-1 ring-slate-200">
+                    <UserRound className="size-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-sm font-black text-slate-900">
+                      {u.full_name || 'Customer'}
+                    </h3>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                      {u.phone && <span className="truncate">{u.phone}</span>}
+                      {u.phone && u.email && <span>•</span>}
+                      {u.email && <span className="truncate">{u.email}</span>}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-        </section>
+          </section>
+        )}
+
+        {!isOwner && (
+          <section className="mt-4 overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 shadow-sm ring-1 ring-indigo-100">
+            <div className="flex items-center gap-3">
+              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm">
+                <UserRound className="size-6" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-black uppercase tracking-wider text-indigo-600">
+                  Seller details
+                </p>
+                <h2 className="truncate text-[15px] font-black text-slate-900">
+                  {product.sellerName || t('localSeller')}
+                </h2>
+                <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
+                  {t('repliesWithinHour')}
+                </p>
+              </div>
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-black text-white shadow-sm">
+                  {product.sellerRating > 0 ? product.sellerRating.toFixed(1) : 'New'}
+                  <Star className="size-3 fill-white" />
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-black text-indigo-600 ring-1 ring-indigo-200">
+                  <ShieldCheck className="size-3" />
+                  {t('safe')}
+                </span>
+              </div>
+            </div>
+
+            {sellerPhone && (
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <button
+                  className="flex h-12 items-center justify-center gap-2 rounded-xl bg-white text-[14px] font-black text-indigo-700 shadow-sm ring-1 ring-indigo-200 transition-all hover:bg-indigo-50 active:scale-95"
+                  type="button"
+                  onClick={handleChatClick}
+                >
+                  <MessageCircle className="size-4.5" />
+                  {t('chat')}
+                </button>
+                <button
+                  className="flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-[14px] font-black text-white shadow-md shadow-indigo-200 transition-all hover:opacity-90 active:scale-95"
+                  type="button"
+                  onClick={handleCallClick}
+                >
+                  <Phone className="size-4.5" />
+                  {t('callSeller')}
+                </button>
+              </div>
+            )}
+          </section>
+        )}
       </main>
     </div>
   )

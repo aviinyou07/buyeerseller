@@ -8,7 +8,8 @@ import {
   getSellerEarnings,
   updateUserProfile,
   updateUserAddress,
-  updateSellerProfileByUserId
+  updateSellerProfileByUserId,
+  getUserRewardPoints
 } from './users.queries.js';
 
 function requireAuth(req, res) {
@@ -33,12 +34,13 @@ export async function getProfileData(req, res) {
   if (!user) return;
 
   try {
-    const [addresses, paymentMethods, bankAccounts, kyc, earnings] = await Promise.all([
+    const [addresses, paymentMethods, bankAccounts, kyc, earnings, rewardPoints] = await Promise.all([
       getUserAddresses(user.id),
       getUserPaymentMethods(user.id),
       getUserBankAccounts(user.id),
       getUserKycStatus(user.id),
-      getSellerEarnings(user.id)
+      getSellerEarnings(user.id),
+      getUserRewardPoints(user.id)
     ]);
 
     return res.json({
@@ -48,7 +50,8 @@ export async function getProfileData(req, res) {
         paymentMethods,
         bankAccounts,
         kyc,
-        earnings
+        earnings,
+        rewardPoints
       }
     });
   } catch (error) {

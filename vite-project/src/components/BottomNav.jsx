@@ -20,7 +20,7 @@ const BottomNav = () => {
             className={({ isActive }) =>
               `flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-xs font-bold transition ${
                 isActive
-                  ? 'text-[#4d49b9]'
+                  ? 'text-indigo-600'
                   : 'text-[#082b49]/55 '
               }`
             }
@@ -33,7 +33,7 @@ const BottomNav = () => {
                 <span>{t(labelKey)}</span>
                 <span
                   className={`h-1.5 w-1.5 rounded-full transition ${
-                    isActive ? 'bg-[#4d49b9]' : 'bg-transparent'
+                    isActive ? 'bg-indigo-600' : 'bg-transparent'
                   }`}
                 />
               </>

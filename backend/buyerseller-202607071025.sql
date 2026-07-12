@@ -1283,3 +1283,19 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-07-07 10:25:26
+
+--
+-- Table structure for table `listing_interactions`
+--
+
+CREATE TABLE `listing_interactions` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `listing_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  `interaction_type` enum('call','chat') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_user_interaction` (`listing_id`,`user_id`,`interaction_type`),
+  KEY `listing_interactions_listing_id_idx` (`listing_id`),
+  KEY `listing_interactions_user_id_idx` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

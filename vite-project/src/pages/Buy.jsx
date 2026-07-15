@@ -25,7 +25,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCategories } from '../api/categoriesApi'
 import { getlistings, normalizeProduct } from '../api/productsApi'
-import { PackageOpen, Star, Sun, Moon, Sunrise, Gift, Bell, UserCircle, ArrowRight, Search } from 'lucide-react'
+import { PackageOpen, Star, Sun, Moon, Sunrise, Gift, Bell, UserCircle, ArrowRight, Search, ChevronRight } from 'lucide-react'
 import bagImage from '../assets/bag.png'
 import laptopImage from '../assets/laptop.png'
 import mobileImage from '../assets/mobile.png'
@@ -153,7 +153,7 @@ const CategoryCard = ({ category, item, onClick }) => {
       onClick={() => onClick(category, item)}
       className="group flex flex-col items-center justify-start gap-2 p-1 text-center transition active:scale-[0.98]"
     >
-      <div className={`flex w-full aspect-square items-center justify-center text-white overflow-hidden rounded-sm ${colorClass} shadow-md border-2 border-white/50`}>
+      <div className={`flex w-full aspect-square items-center justify-center text-white overflow-hidden rounded-sm ${!item.image ? colorClass : 'bg-transparent'} shadow-md`}>
         {item.image ? (
           <img
             alt={item.name}
@@ -164,7 +164,7 @@ const CategoryCard = ({ category, item, onClick }) => {
           <Icon className="size-8" strokeWidth={2.2} />
         )}
       </div>
-      <span className="line-clamp-2 font-black leading-tight text-[slate-900] text-[11px] mt-1 tracking-tight">
+      <span className="line-clamp-2 font-medium leading-tight text-slate-800 text-[12px] mt-1 tracking-normal font-sans">
         {label}
       </span>
     </div>
@@ -183,15 +183,15 @@ const CategorySection = ({ category, onCardClick }) => {
       <div className="flex w-full items-center justify-between gap-4 text-left">
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-black tracking-normal text-[#2e016e]">
+            <h2 className="text-lg font-semibold tracking-normal text-[#2e016e]">
               {category.titleKey ? t(category.titleKey) : category.title}
             </h2>
             <button
               type="button"
               onClick={() => navigate(`/categories/${category.id}/all`)}
-              className="text-sm font-bold text-[#4d49b9] hover:text-[#2e016e] transition-colors"
+              className="text-slate-500 hover:text-slate-700 transition-colors"
             >
-              View All
+              <ChevronRight size={20} strokeWidth={2.5} />
             </button>
           </div>
           <p className=" text-xs font-semibold leading-relaxed text-indigo-900/60">
@@ -237,7 +237,7 @@ const FeaturedListings = ({ listings, onClick }) => {
         <div className="grid size-8 place-items-center rounded-full bg-white text-[#4d49b9] shadow-sm">
           <Star className="size-4" fill="currentColor" />
         </div>
-        <h2 className="text-lg font-black tracking-normal text-[#2e016e]">
+        <h2 className="text-lg font-semibold tracking-normal text-[#2e016e]">
           {t('featuredDeals') || 'Featured Deals'}
         </h2>
       </div>
@@ -264,10 +264,10 @@ const FeaturedListings = ({ listings, onClick }) => {
               )}
             </div>
             <div className="flex flex-col px-1 pb-4 items-center text-center">
-              <span className="mt-1.5 line-clamp-1 w-full text-xs font-black tracking-normal text-indigo-950">
+              <span className="mt-1.5 line-clamp-1 w-full text-[13px] font-medium tracking-normal text-indigo-950 font-sans">
                 {item.nameKey ? t(item.nameKey) : item.name}
               </span>
-              <span className="mt-1 text-xs font-bold text-indigo-700">
+              <span className="mt-1 text-xs font-medium text-indigo-700">
                 {item.price ? `₹${item.price.toLocaleString('en-IN')}` : ''}
               </span>
             </div>
@@ -298,6 +298,7 @@ const Buy = () => {
   const GreetingIcon = greeting.icon
 
   const [showNotifications, setShowNotifications] = useState(false)
+  const [notifications, setNotifications] = useState(mockNotifications)
   const notificationsRef = useRef(null)
   
   const [rewardPoints, setRewardPoints] = useState(0)
@@ -398,7 +399,7 @@ const Buy = () => {
         {/* Top Navbar */}
         <div className="flex items-center justify-between mb-4 relative z-50">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-black tracking-tight text-slate-900">{t('marketplace') || 'Marketplace'}</h2>
+            <h2 className="text-xl font-semibold tracking-tight text-slate-900">{t('marketplace') || 'Marketplace'}</h2>
           </div>
           <div className="flex items-center gap-3 relative" ref={notificationsRef}>
             <button 
@@ -406,32 +407,34 @@ const Buy = () => {
               className="relative p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition text-slate-900 shadow-sm backdrop-blur-md border border-white/30"
             >
               <Bell size={22} />
-              <span className="absolute top-1 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-slate-200"></span>
+              {notifications.length > 0 && <span className="absolute top-1 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-slate-200"></span>}
             </button>
             
             {/* Notifications Dropdown */}
             {showNotifications && (
               <div className="absolute top-full right-0 mt-2 w-64 max-w-[85vw] bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50 text-slate-900">
                 <div className="p-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/80">
-                  <h3 className="text-sm font-bold">Notifications</h3>
-                  <span className="text-[10px] text-[#4d49b9] cursor-pointer font-semibold hover:underline">Mark all read</span>
+                  <h3 className="text-sm font-medium">Notifications</h3>
+                  <span className="text-[10px] text-[#4d49b9] cursor-pointer font-semibold hover:underline" onClick={() => setNotifications([])}>Mark all read</span>
                 </div>
                 <div className="max-h-[45vh] overflow-y-auto">
-                  {mockNotifications.map(notif => (
-                    <div key={notif.id} className={`p-2.5 border-b border-slate-50 hover:bg-slate-50 transition cursor-pointer flex gap-2.5 ${notif.unread ? 'bg-indigo-50/40' : ''}`}>
+                  {notifications.length > 0 ? notifications.map(notif => (
+                    <div key={notif.id} className={`p-2.5 border-b border-slate-50 hover:bg-slate-50 transition cursor-pointer flex gap-2.5 ${notif.unread ? 'bg-indigo-50/40' : ''}`} onClick={() => setNotifications(prev => prev.filter(n => n.id !== notif.id))}>
                        <div className="mt-1">
                           <div className={`w-1.5 h-1.5 rounded-full ${notif.unread ? 'bg-[#4d49b9]' : 'bg-transparent'}`}></div>
                        </div>
                        <div>
-                         <h4 className="text-xs font-bold text-slate-900">{notif.title}</h4>
+                         <h4 className="text-xs font-medium text-slate-900">{notif.title}</h4>
                          <p className="text-[11px] text-slate-600 mt-0.5 leading-tight">{notif.message}</p>
                          <p className="text-[9px] text-slate-500 mt-1 font-medium">{notif.time}</p>
                        </div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="p-4 text-center text-xs text-slate-500">No new notifications</div>
+                  )}
                 </div>
                 <div className="p-2 text-center bg-slate-50/80 border-t border-slate-100">
-                  <button className="text-[11px] font-bold text-[#4d49b9] hover:underline" onClick={() => setShowNotifications(false)}>Close</button>
+                  <button className="text-[11px] font-medium text-[#4d49b9] hover:underline" onClick={() => setShowNotifications(false)}>Close</button>
                 </div>
               </div>
             )}
@@ -446,8 +449,10 @@ const Buy = () => {
           </div>
         </div>
 
-        <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-white/20 blur-xl" />
-        <div className="pointer-events-none absolute -left-14 bottom-[-5rem] size-40 rounded-full bg-white/20 blur-xl" />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -right-16 -top-20 size-48 rounded-full bg-white/20 blur-xl" />
+          <div className="absolute -left-14 bottom-[-5rem] size-40 rounded-full bg-white/20 blur-xl" />
+        </div>
         <div className="relative mx-auto max-w-3xl flex items-end justify-between gap-4 mt-2">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 opacity-90 mb-0.5 text-slate-800">
@@ -464,7 +469,7 @@ const Buy = () => {
             <Gift size={18} className="text-purple-700" />
             <div className="flex flex-col items-start leading-tight">
               <span className="text-[11px] text-slate-800 font-semibold">Rewards</span>
-              <span className="text-base font-black tracking-tight text-[#2e016e] leading-none">{isAuth ? rewardPoints : 0} PTS</span>
+              <span className="text-base font-semibold tracking-tight text-[#2e016e] leading-none">{isAuth ? rewardPoints : 0} Pts</span>
             </div>
           </div>
         </div>
@@ -504,7 +509,7 @@ const Buy = () => {
               </section>
             ))
           ) : categoryError ? (
-            <section className="rounded-lg bg-red-50 px-4 py-5 text-center text-sm font-black text-red-600">
+            <section className="rounded-lg bg-red-50 px-4 py-5 text-center text-sm font-semibold text-red-600">
               {categoryError}
             </section>
           ) : categories.length > 0 ? (
@@ -516,7 +521,7 @@ const Buy = () => {
               />
             ))
           ) : (
-            <section className="rounded-lg bg-slate-50 px-4 py-5 text-center text-sm font-black text-slate-500">
+            <section className="rounded-lg bg-slate-50 px-4 py-5 text-center text-sm font-semibold text-slate-500">
               No categories found.
             </section>
           )}

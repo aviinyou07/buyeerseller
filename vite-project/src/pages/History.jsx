@@ -80,12 +80,12 @@ const SchemeCard = ({ scheme }) => {
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded bg-[#f1efff] px-2 py-1 text-[10px] font-black text-[#4d49b9]">
+          <span className="rounded bg-[#f1efff] px-2 py-1 text-[10px] font-semibold text-[#4d49b9]">
             {scheme.id}
           </span>
           {scheme.status && (
             <span
-              className={`rounded-full px-2 py-1 text-[10px] font-black ${
+              className={`rounded-full px-2 py-1 text-[10px] font-semibold ${
                 statusStyles[scheme.status] || 'bg-slate-100 text-slate-500'
               }`}
             >
@@ -94,10 +94,10 @@ const SchemeCard = ({ scheme }) => {
           )}
         </div>
 
-        <h2 className="mt-2 text-base font-black leading-5 text-[#102a43]">
+        <h2 className="mt-2 text-base font-semibold leading-5 text-[#102a43]">
           {schemeText.title}
         </h2>
-        <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-slate-500">
+        <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
           <Landmark className="size-3.5 shrink-0" />
           <span className="truncate">{schemeText.department}</span>
         </p>
@@ -115,31 +115,31 @@ const SchemeCard = ({ scheme }) => {
 
     <div className="mt-3 grid grid-cols-1 gap-2">
       <div className="rounded-lg bg-[#f7fafc] p-2.5">
-        <p className="flex items-center gap-1.5 text-[11px] font-black uppercase text-slate-400">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase text-slate-400">
           <BadgeIndianRupee className="size-3.5" />
           {t('benefit')}
         </p>
-        <p className="mt-1 text-xs font-bold leading-5 text-[#102a43]">
+        <p className="mt-1 text-xs font-medium leading-5 text-[#102a43]">
           {schemeText.benefit}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="rounded-lg bg-[#f7fafc] p-2.5">
-          <p className="flex items-center gap-1.5 text-[11px] font-black uppercase text-slate-400">
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase text-slate-400">
             <UsersRound className="size-3.5" />
             {t('eligibility')}
           </p>
-          <p className="mt-1 line-clamp-2 text-xs font-bold leading-5 text-[#102a43]">
+          <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-[#102a43]">
             {schemeText.eligibility}
           </p>
         </div>
         <div className="rounded-lg bg-[#f7fafc] p-2.5">
-          <p className="flex items-center gap-1.5 text-[11px] font-black uppercase text-slate-400">
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase text-slate-400">
             <CalendarDays className="size-3.5" />
             {t('deadline')}
           </p>
-          <p className="mt-1 text-xs font-bold leading-5 text-[#102a43]">
+          <p className="mt-1 text-xs font-medium leading-5 text-[#102a43]">
             {scheme.deadline}
           </p>
         </div>
@@ -147,11 +147,11 @@ const SchemeCard = ({ scheme }) => {
     </div>
 
     <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
-      <span className="rounded-md bg-white px-2.5 py-1 text-xs font-black text-slate-600 ring-1 ring-slate-200">
+      <span className="rounded-md bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
         {schemeText.category}
       </span>
       <button
-        className="h-10 rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-black text-white shadow-sm shadow-indigo-200 transition hover:opacity-90 active:scale-95"
+        className="h-10 rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-semibold text-white shadow-sm shadow-indigo-200 transition hover:opacity-90 active:scale-95"
         type="button"
         onClick={openSchemeLink}
       >
@@ -227,7 +227,7 @@ const History = () => {
               <Building2 className="size-5" />
             </span>
             <div className="min-w-0">
-              <h1 className="text-lg font-black tracking-normal">
+              <h1 className="text-lg font-semibold tracking-normal">
                 {t('governmentSchemes')}
               </h1>
               <p className="text-xs font-semibold text-slate-500">
@@ -242,20 +242,20 @@ const History = () => {
         <section className="grid grid-cols-2 gap-2 sm:grid-cols-2">
           <div className="bg-white p-3 ring-1 ring-slate-100 rounded-xl shadow-sm">
             <FileCheck2 className="size-5 text-indigo-600" />
-            <p className="mt-2 text-lg font-black">{schemes.length}</p>
-            <p className="text-xs font-bold text-slate-500">{t('totalSchemes')}</p>
+            <p className="mt-2 text-lg font-semibold">{schemes.length}</p>
+            <p className="text-xs font-medium text-slate-500">{t('totalSchemes')}</p>
           </div>
           <div className="bg-white p-3 ring-1 ring-slate-100">
             <CheckCircle2 className="size-5 text-emerald-600" />
-            <p className="mt-2 text-lg font-black">
+            <p className="mt-2 text-lg font-semibold">
               {schemes.filter(isOpenScheme).length}
             </p>
-            <p className="text-xs font-bold text-slate-500">{t('openNow')}</p>
+            <p className="text-xs font-medium text-slate-500">{t('openNow')}</p>
           </div>
         </section>
 
         {error && (
-          <section className="rounded-lg bg-red-50 px-4 py-5 text-center text-sm font-black text-red-600">
+          <section className="rounded-lg bg-red-50 px-4 py-5 text-center text-sm font-semibold text-red-600">
             {error}
           </section>
         )}
@@ -272,7 +272,7 @@ const History = () => {
 
         {!isLoading && !error && schemes.length === 0 && (
           <section className="rounded-lg bg-white px-4 py-12 text-center ring-1 ring-slate-100">
-            <p className="text-base font-black">{t('totalSchemes')}: 0</p>
+            <p className="text-base font-semibold">{t('totalSchemes')}: 0</p>
           </section>
         )}
       </main>

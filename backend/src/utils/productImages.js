@@ -23,8 +23,8 @@ export async function createProductImageVariants(files = []) {
         await sharp(file.path)
           .rotate()
           .resize(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, {
-            fit: 'cover',
-            position: 'centre',
+            fit: 'contain',
+            background: { r: 255, g: 255, b: 255, alpha: 0 }
           })
           .webp({ quality: THUMBNAIL_QUALITY })
           .toFile(thumbnailPath);

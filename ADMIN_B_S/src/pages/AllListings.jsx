@@ -332,49 +332,73 @@ const AllListings = () => {
     }
   };
 
-  const openModal = (mode, product = null) => {
+  const openModal = async (mode, product = null) => {
     setFormMode(mode);
     setImageFile(null);
     setThumbnailFiles([]);
     if (product) {
+      let fullProduct = product;
+      if (mode === "edit" || mode === "view") {
+        try {
+          const res = await api.get(`/listings/${product.id}`);
+          if (res.success && res.data) {
+            const detail = res.data;
+            const meta = detail.meta || {};
+            let parsedMeta = meta;
+            if (typeof meta === 'string') {
+              try { parsedMeta = JSON.parse(meta); } catch (e) { parsedMeta = {}; }
+            }
+            const customFields = Array.isArray(parsedMeta.overviewFields) ? parsedMeta.overviewFields : [];
+            
+            fullProduct = {
+              ...product,
+              description: detail.description || product.description,
+              customFields: customFields,
+            };
+          }
+        } catch (e) {
+          console.error("Failed to fetch full listing details", e);
+        }
+      }
+
       setFormData({
-        id: product.id,
-        name: product.name,
-        sellerId: product.sellerId || "",
-        categoryId: product.categoryId || "",
-        subCategoryId: product.subCategoryId || "",
-        price: String(product.rawPrice || ""),
-        salePrice: product.salePrice || "",
-        sku: product.sku || "",
-        quantity: String(product.quantity || "1"),
+        id: fullProduct.id,
+        name: fullProduct.name,
+        sellerId: fullProduct.sellerId || "",
+        categoryId: fullProduct.categoryId || "",
+        subCategoryId: fullProduct.subCategoryId || "",
+        price: String(fullProduct.rawPrice || ""),
+        salePrice: fullProduct.salePrice || "",
+        sku: fullProduct.sku || "",
+        quantity: String(fullProduct.quantity || "1"),
         status:
-          product.status === "Active"
+          fullProduct.status === "Active"
             ? "approved"
-            : product.status === "Pending"
+            : fullProduct.status === "Pending"
               ? "pending"
-              : product.status === "Rejected"
+              : fullProduct.status === "Rejected"
                 ? "rejected"
                 : "inactive",
-        brand: product.brand || "",
-        condition: product.condition || "Good Condition",
-        usedFor: product.usedFor || "",
-        offerBadge: product.offerBadge || "",
-        warranty: product.warranty || "",
-        location: product.location || "",
-        shippingAvailable: product.shippingAvailable || false,
-        visibility: product.visibility || "public",
-        description: product.description || "",
-        customFields: product.customFields || [],
-        image: product.image || "",
-        thumbnail: product.thumbnail || "",
-        isPublished: product.isPublished,
+        brand: fullProduct.brand || "",
+        condition: fullProduct.condition || "Good Condition",
+        usedFor: fullProduct.usedFor || "",
+        offerBadge: fullProduct.offerBadge || "",
+        warranty: fullProduct.warranty || "",
+        location: fullProduct.location || "",
+        shippingAvailable: fullProduct.shippingAvailable || false,
+        visibility: fullProduct.visibility || "public",
+        description: fullProduct.description || "",
+        customFields: fullProduct.customFields || [],
+        image: fullProduct.image || "",
+        thumbnail: fullProduct.thumbnail || "",
+        isPublished: fullProduct.isPublished,
       });
-      setImagePreview(product.image || "");
+      setImagePreview(fullProduct.image || "");
       setThumbnailPreviews(
-        (product.thumbnails && product.thumbnails.length > 0
-          ? product.thumbnails.map((thumb) => thumb.url)
-          : product.thumbnail
-            ? [product.thumbnail]
+        (fullProduct.thumbnails && fullProduct.thumbnails.length > 0
+          ? fullProduct.thumbnails.map((thumb) => thumb.url)
+          : fullProduct.thumbnail
+            ? [fullProduct.thumbnail]
             : []) || [],
       );
     } else {

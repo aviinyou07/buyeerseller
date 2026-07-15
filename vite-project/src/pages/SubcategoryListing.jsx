@@ -274,7 +274,7 @@ const ProductCard = ({
       }}
     >
       {/* Left Image */}
-      <div className="relative h-full min-h-32 overflow-hidden bg-[#fbfaff] p-2">
+      <div className="relative h-full min-h-32 overflow-hidden bg-white p-3">
         {product.image ? (
           <img
             alt={product.title}
@@ -288,7 +288,7 @@ const ProductCard = ({
         )}
 
         {meta.offerBadge && (
-          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black text-[slate-900] shadow-sm">
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-semibold text-[slate-900] shadow-sm">
             <Tag className="size-2.5" />
             {translateProductText(meta.offerBadge, t)}
           </span>
@@ -300,11 +300,11 @@ const ProductCard = ({
         <div className="min-w-0">
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
-              <h2 className="line-clamp-2 text-sm font-black leading-5 tracking-normal text-[#101828] w-full">
+              <h2 className="line-clamp-2 text-sm font-semibold leading-5 tracking-normal text-[#101828] w-full">
                 {product.title}
               </h2>
               {meta.companyName && (
-                <p className="mt-0.5 truncate text-xs font-bold text-slate-500">
+                <p className="mt-0.5 truncate text-xs font-medium text-slate-500">
                   {meta.companyName}
                 </p>
               )}
@@ -313,7 +313,7 @@ const ProductCard = ({
 
           <div className="mt-1.5 flex items-center gap-1.5">
             {meta.rating && (
-              <span className="inline-flex items-center gap-1 rounded bg-[#2eb139] px-2 py-0.5 text-xs font-black text-white">
+              <span className="inline-flex items-center gap-1 rounded bg-[#2eb139] px-2 py-0.5 text-xs font-semibold text-white">
                 {meta.rating}
                 <Star className="size-3 fill-white" />
               </span>
@@ -326,13 +326,13 @@ const ProductCard = ({
             )}
 
             {product.isVerified && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#f1efff] px-2 py-0.5 text-[11px] font-black text-[#4d49b9]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#f1efff] px-2 py-0.5 text-[11px] font-semibold text-[#4d49b9]">
                 <BadgeCheck className="size-3" />
                 {t("verified")}
               </span>
             )}
 
-            <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-[11px] font-black text-slate-500">
+            <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-slate-500">
               <Eye className="size-3 text-[#4d49b9]" />
               {`${meta.views} views`}
             </span>
@@ -346,20 +346,20 @@ const ProductCard = ({
 
             <span className="text-slate-300">•</span>
 
-            <span className="font-black text-[slate-900]">
+            <span className="font-semibold text-[slate-900]">
               {translateProductText(product.condition || "Good Condition", t)}
             </span>
           </div>
 
           <div className="mt-2 flex flex-wrap gap-1.5">
             {meta.offerBadge && (
-              <span className="rounded-md border border-amber-100 bg-amber-50 px-2 py-1 text-[11px] font-black text-amber-700">
+              <span className="rounded-md border border-amber-100 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700">
                 {translateProductText(meta.offerBadge, t)}
               </span>
             )}
 
             {product.brand && (
-              <span className="rounded-md border border-slate-200 bg-[#fbfaff] px-2 py-1 text-[11px] font-bold text-slate-700">
+              <span className="rounded-md border border-slate-200 bg-[#fbfaff] px-2 py-1 text-[11px] font-medium text-slate-700">
                 {product.brand}
               </span>
             )}
@@ -368,7 +368,7 @@ const ProductCard = ({
 
         <div className=" flex items-center justify-between gap-2 pt-3">
           <div className="min-w-0">
-            <span className="block text-md font-black leading-none text-[slate-900]">
+            <span className="block text-md font-semibold leading-none text-[slate-900]">
               {formatPrice(product.price)}
             </span>
           </div>
@@ -411,7 +411,7 @@ const ProductCard = ({
               ))}
               <button
                 aria-label={isLiked ? "Unlike product" : t("likeProduct")}
-                className={`inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-black transition ${
+                className={`inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold transition ${
                   isLiked
                     ? "bg-indigo-50 text-indigo-600"
                     : "bg-white text-slate-500 ring-1 ring-slate-200 hover:text-indigo-600"
@@ -649,7 +649,7 @@ const SubcategoryListing = () => {
               <ArrowLeft className="size-5" />
             </button>
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg font-black tracking-normal">
+              <h1 className="text-lg font-semibold tracking-normal">
                 {t("searchMarketplace")}
               </h1>
               <p className="text-xs font-semibold text-[slate-900]/58">
@@ -682,13 +682,13 @@ const SubcategoryListing = () => {
             <div className="mt-3 flex items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 {query && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm ring-1 ring-slate-200">
                     <Search className="size-3.5 text-indigo-500" />
                     {query}
                   </span>
                 )}
                 {location && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm ring-1 ring-slate-200">
                     <MapPin className="size-3.5 text-indigo-500" />
                     {location}
                   </span>
@@ -709,14 +709,14 @@ const SubcategoryListing = () => {
       <main className="mx-auto max-w-5xl px-3 pt-3">
         <section className="space-y-3">
           {errorMessage && (
-            <div className="bg-red-50 px-4 py-3 text-center text-sm font-black text-red-600">
+            <div className="bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600">
               {errorMessage}
             </div>
           )}
 
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-base font-black tracking-normal text-[#101828]">
+              <p className="text-base font-semibold tracking-normal text-[#101828]">
                 {filteredlistings.length} {t("Products", { defaultValue: "Products" })}
               </p>
               <p className="mt-0.5 text-xs font-semibold text-slate-500">
@@ -751,7 +751,7 @@ const SubcategoryListing = () => {
             </div>
           ) : (
             <div className="rounded-lg bg-white px-3 py-12 text-center shadow-sm shadow-slate-200/60 ring-1 ring-slate-100">
-              <p className="text-base font-black">{t("nolistingsFound")}</p>
+              <p className="text-base font-semibold">{t("nolistingsFound")}</p>
               <p className="mt-2 text-sm font-semibold text-slate-500">
                 {t("tryAnotherSearch")}
               </p>

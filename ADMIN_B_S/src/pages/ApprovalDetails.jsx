@@ -251,7 +251,7 @@ const ApprovalDetails = () => {
                     </button>
                     <button
                       onClick={handleApprove}
-                      className="flex items-center gap-1.5 px-6 py-2 bg-blue-600 text-white border border-transparent hover:bg-blue-700 font-semibold rounded-lg transition-all shadow-sm text-sm"
+                      className="flex items-center gap-1.5 px-6 py-2 bg-green-600 text-white border border-transparent hover:bg-green-700 font-semibold rounded-lg transition-all shadow-sm text-sm"
                     >
                       <CheckCircle size={16} /> Approve
                     </button>
@@ -308,44 +308,41 @@ const ApprovalDetails = () => {
                 </div>
               </div>
 
-              {/* Column 2: Specifications */}
+              {/* Column 2: Product Details */}
               <div className="space-y-6">
                 <div>
                   <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                    <Box size={14} /> Specifications
+                    <Box size={14} /> Product Details
                   </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      <p className="text-[10px] text-gray-500 mb-0.5">Condition</p>
-                      <p className="text-sm font-semibold text-gray-900">{data.condition || 'N/A'}</p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      <p className="text-[10px] text-gray-500 mb-0.5">Warranty</p>
-                      <p className="text-sm font-semibold text-gray-900">{data.warranty || 'None'}</p>
-                    </div>
-                    <div className="col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      <p className="text-[10px] text-gray-500 mb-0.5">Used For</p>
-                      <p className="text-sm font-semibold text-gray-900">{data.used_for || data.usedFor || 'N/A'}</p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      <p className="text-[10px] text-gray-500 mb-0.5">Quantity</p>
-                      <p className="text-sm font-semibold text-gray-900">{data.quantity || '1'}</p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      <p className="text-[10px] text-gray-500 mb-0.5">Views / Likes</p>
-                      <p className="text-sm font-semibold text-gray-900">{data.views_count || '0'} / {data.likes_count || '0'}</p>
-                    </div>
-                  </div>
-
-                  {data.custom_attributes && data.custom_attributes.length > 0 && (
-                    <div className="mt-4 space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Other Details</p>
-                      {data.custom_attributes.map((attr, idx) => (
-                        <div key={idx} className="flex justify-between items-center py-1.5 border-b border-gray-200 last:border-0 text-xs">
-                          <span className="text-gray-500 capitalize">{attr.label || attr.key}</span>
-                          <span className="font-semibold text-gray-900 max-w-[60%] text-right truncate" title={attr.value}>{attr.value || 'N/A'}</span>
+                  
+                  {(data.custom_attributes || []).filter(attr => !String(attr.key || '').startsWith('custom_')).length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      {(data.custom_attributes || []).filter(attr => !String(attr.key || '').startsWith('custom_')).map((field, idx) => (
+                        <div key={`overview-${idx}`} className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                          <p className="text-[10px] text-gray-500 mb-0.5 capitalize">{field.label || field.key}</p>
+                          <p className="text-sm font-semibold text-gray-900">{field.value || 'N/A'}</p>
                         </div>
                       ))}
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-center justify-center text-sm text-gray-400 italic">
+                      No admin-defined fields found.
+                    </div>
+                  )}
+
+                  {(data.custom_attributes || []).filter(attr => String(attr.key || '').startsWith('custom_')).length > 0 && (
+                    <div className="mt-5">
+                      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <Tag size={14} /> Seller Custom Details
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {(data.custom_attributes || []).filter(attr => String(attr.key || '').startsWith('custom_')).map((field, idx) => (
+                          <div key={`custom-${idx}`} className="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                            <p className="text-[10px] text-blue-500 mb-0.5 capitalize">{field.label || field.key}</p>
+                            <p className="text-sm font-semibold text-gray-900">{field.value || 'N/A'}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -399,29 +396,34 @@ const ApprovalDetails = () => {
                   </div>
                 </div>
 
-                {data.interested_customers && data.interested_customers.length > 0 && (
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                      <User size={14} /> Interested Customers ({data.interested_customers.length})
-                    </h3>
-                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-3">
-                      {data.interested_customers.map((user, idx) => (
-                        <div key={idx} className="flex items-center gap-3 text-xs pb-3 border-b border-gray-200 last:border-0 last:pb-0">
-                          <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
-                            {user.full_name?.charAt(0) || 'U'}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-bold text-gray-900 truncate">{user.full_name || 'Unknown User'}</p>
-                            <p className="text-gray-500 truncate">{user.phone || user.email || 'No contact info'}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
               </div>
 
             </div>
+
+            {/* Interested Customers (Full Width) */}
+            {data.interested_customers && data.interested_customers.length > 0 && (
+              <div className="p-5 border-t border-gray-100 bg-white">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                  <User size={14} /> Interested Customers ({data.interested_customers.length})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {data.interested_customers.map((user, idx) => (
+                    <div key={`customer-${idx}`} className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm transition-all hover:shadow-md hover:border-blue-200">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+                        {user.full_name?.charAt(0) || 'U'}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-gray-900 text-sm truncate">{user.full_name || 'Unknown User'}</p>
+                        <p className="text-gray-500 text-xs truncate flex items-center gap-1 mt-0.5">
+                          <Phone size={10} /> {user.phone || user.email || 'No contact info'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import CustomSelect from "../components/CustomSelect";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -67,48 +68,11 @@ const commonListingFields = [
     isRequired: true,
   },
   {
-    name: "price",
-    label: "Expected price",
-    type: "number",
-    placeholder: "Enter price",
-    isRequired: true,
-  },
-  {
-    name: "location",
-    label: "Pickup location",
-    type: "text",
-    placeholder: "Area, City",
-    isRequired: true,
-  },
-  {
-    name: "brand",
-    label: "Brand",
-    type: "text",
-    placeholder: "Brand / Maker",
-  },
-  {
-    name: "condition",
-    label: "Condition",
-    type: "text",
-    placeholder: "e.g. Good, Like New, Fair",
-  },
-  {
-    name: "warranty",
-    label: "Warranty",
-    type: "text",
-    placeholder: "e.g. 1 Year, None",
-  },
-  {
-    name: "usedFor",
-    label: "Used For",
-    type: "text",
-    placeholder: "e.g. Daily Use",
-  },
-  {
     name: "description",
     label: "Description",
     type: "textarea",
     placeholder: "Write important details, reason for selling, accessories, etc.",
+    isRequired: true,
   },
 ];
 
@@ -121,7 +85,7 @@ const Field = ({ field, value, onChange, error }) => {
   const label = translateFormText(field.label, language);
   const placeholder = field.placeholder
     ? translateFormText(field.placeholder, language)
-    : "";
+    : `Enter ${label}`;
   const inputClass =
     `h-12 w-full border bg-white px-3 text-sm font-semibold text-[#102a43] outline-none placeholder:text-slate-400 ${
       error ? "border-red-300 ring-1 ring-red-200" : "border-slate-100"
@@ -130,7 +94,7 @@ const Field = ({ field, value, onChange, error }) => {
   if (field.type === "textarea") {
     return (
       <label className="block">
-        <span className="mb-1.5 block text-sm font-black text-[#102a43]">
+        <span className="mb-1.5 block text-sm font-semibold text-[#102a43]">
           {label}
         </span>
         <textarea
@@ -142,7 +106,7 @@ const Field = ({ field, value, onChange, error }) => {
           value={value || ""}
           onChange={(event) => onChange(field.name, event.target.value)}
         />
-        {error && <span className="mt-1 block text-xs font-bold text-red-500">{error}</span>}
+        {error && <span className="mt-1 block text-xs font-medium text-red-500">{error}</span>}
       </label>
     );
   }
@@ -150,30 +114,25 @@ const Field = ({ field, value, onChange, error }) => {
   if (field.type === "select") {
     return (
       <label className="block">
-        <span className="mb-1.5 block text-sm font-black text-[#102a43]">
+        <span className="mb-1.5 block text-sm font-semibold text-[#102a43]">
           {label}
         </span>
-        <select
-          className={inputClass}
-          required
+        <CustomSelect
+          options={(field.options || []).map(opt => ({ label: translateFormText(opt, language), value: opt }))}
           value={value || ""}
-          onChange={(event) => onChange(field.name, event.target.value)}
-        >
-          <option value="">{t("selectField", { field: label })}</option>
-          {(field.options || []).map((option) => (
-            <option key={option} value={option}>
-              {translateFormText(option, language)}
-            </option>
-          ))}
-        </select>
-        {error && <span className="mt-1 block text-xs font-bold text-red-500">{error}</span>}
+          onChange={(val) => onChange(field.name, val)}
+          placeholder={t("selectField", { field: label })}
+          className="h-12 border-slate-100"
+          error={error}
+        />
+        {error && <span className="mt-1 block text-xs font-medium text-red-500">{error}</span>}
       </label>
     );
   }
 
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-black text-[#102a43]">
+      <span className="mb-1.5 block text-sm font-semibold text-[#102a43]">
         {label}
       </span>
       <input
@@ -184,7 +143,7 @@ const Field = ({ field, value, onChange, error }) => {
         value={value || ""}
         onChange={(event) => onChange(field.name, event.target.value)}
       />
-      {error && <span className="mt-1 block text-xs font-bold text-red-500">{error}</span>}
+      {error && <span className="mt-1 block text-xs font-medium text-red-500">{error}</span>}
     </label>
   );
 };
@@ -397,7 +356,7 @@ const ListingCard = ({ listing }) => {
       <div className="min-w-0 p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-black text-[#102a43]">
+            <h2 className="truncate text-sm font-semibold text-[#102a43]">
               {listing.title}
             </h2>
             <p className="mt-1 truncate text-sm font-semibold text-slate-500">
@@ -407,16 +366,16 @@ const ListingCard = ({ listing }) => {
                 .join(" - ") || t("marketplaceListing")}
             </p>
           </div>
-          <span className="shrink-0 rounded-full bg-[#f1efff] px-2 py-1 text-[10px] font-black text-[#4d49b9]">
+          <span className="shrink-0 rounded-full bg-[#f1efff] px-2 py-1 text-[10px] font-semibold text-[#4d49b9]">
             {translateListingText(listing.status || "Active", t)}
           </span>
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-2">
-          <span className="text-base font-black text-[#102a43]">
+          <span className="text-base font-semibold text-[#102a43]">
             {formatCurrency(listing.price)}
           </span>
-          <span className="text-[11px] font-bold text-slate-400">
+          <span className="text-[11px] font-medium text-slate-400">
             {translateListingText(listing.postedAt || "Recently", t)}
           </span>
         </div>
@@ -464,6 +423,7 @@ const AddListing = () => {
     label: "",
     type: "text",
   });
+  const [isCustomFieldModalOpen, setIsCustomFieldModalOpen] = useState(false);
   const [listingPhotos, setListingPhotos] = useState(() => {
     const initialUrls = isEditing
       ? (editingListing?.photos?.length ? editingListing.photos : [editingListing?.image]).filter(Boolean).slice(0, 10)
@@ -594,7 +554,15 @@ const AddListing = () => {
   const dynamicFields = useMemo(
     () =>
       (backendFormFields.length ? backendFormFields : selectedSubcategory?.fields || [])
-        .filter((field) => !isCommonListingField(field)),
+        .filter((field) => {
+          const normName = normalizeLookupText(field.name);
+          const normLabel = normalizeLookupText(field.label);
+          const titleKeys = ["title", "listing_title", "product_title", "name"];
+          const descKeys = ["description", "product_description", "details"];
+          const isTitle = titleKeys.includes(normName) || titleKeys.includes(normLabel) || /\btitle\b/i.test(field.label) || /\bproduct\s*name\b/i.test(field.label);
+          const isDesc = descKeys.includes(normName) || descKeys.includes(normLabel) || /\bdescription\b/i.test(field.label) || /\bdetails?\b/i.test(field.label);
+          return !isTitle && !isDesc;
+        }),
     [backendFormFields, selectedSubcategory],
   );
 
@@ -652,24 +620,8 @@ const AddListing = () => {
       ["title", "listing_title", "product_title", "name"],
       [/\btitle\b/i, /\bproduct\s*name\b/i, /\blisting\s*name\b/i],
     );
-    const listingPrice = getResolvedFieldValue(
-      formValues,
-      listingFields,
-      ["price", "expected_price", "amount"],
-      [/\bprice\b/i, /\bamount\b/i, /\bcost\b/i],
-    );
-
     if (isBlank(listingTitle.value)) {
       nextErrors[listingTitle.fieldName] = "Title is required.";
-    }
-
-    if (isBlank(listingPrice.value)) {
-      nextErrors[listingPrice.fieldName] = "Expected price is required.";
-    }
-
-    if (!isBlank(listingPrice.value) && Number(listingPrice.value) <= 0) {
-      nextErrors[listingPrice.fieldName] =
-        "Expected price must be greater than 0.";
     }
 
     setValidationErrors(nextErrors);
@@ -730,6 +682,7 @@ const AddListing = () => {
       label: "",
       type: "text",
     });
+    setIsCustomFieldModalOpen(false);
   };
 
   const removeCustomField = (fieldName) => {
@@ -973,7 +926,7 @@ const AddListing = () => {
           <div className="mx-auto max-w-5xl">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <h1 className="truncate text-lg font-black tracking-normal">
+                <h1 className="truncate text-lg font-semibold tracking-normal">
                   {t("myListings")}
                 </h1>
                 <p className="text-sm font-semibold text-slate-500">
@@ -981,7 +934,7 @@ const AddListing = () => {
                 </p>
               </div>
               <button
-                className="flex h-10 shrink-0 items-center justify-center gap-2 bg-[#4d49b9] px-3 text-sm font-black text-white"
+                className="flex h-10 shrink-0 items-center justify-center gap-2 bg-[#4d49b9] px-3 text-sm font-semibold text-white"
                 type="button"
                 onClick={() => setIsFormOpen(true)}
               >
@@ -1002,14 +955,14 @@ const AddListing = () => {
           ) : (
             <section className="bg-white px-4 py-12 text-center ring-1 ring-slate-100">
               <PackageOpen className="mx-auto size-10 text-slate-300" />
-              <h2 className="mt-3 text-base font-black text-[#102a43]">
+              <h2 className="mt-3 text-base font-semibold text-[#102a43]">
                 {t("noListingsYet")}
               </h2>
               <p className="mx-auto mt-1 max-w-sm text-sm font-semibold leading-5 text-slate-500">
                 {t("addFirstProduct")}
               </p>
               <button
-                className="mt-5 inline-flex h-11 items-center justify-center gap-2 bg-[#4d49b9] px-5 text-sm font-black text-white"
+                className="mt-5 inline-flex h-11 items-center justify-center gap-2 bg-[#4d49b9] px-5 text-sm font-semibold text-white"
                 type="button"
                 onClick={() => setIsFormOpen(true)}
               >
@@ -1027,7 +980,7 @@ const AddListing = () => {
     <div className="min-h-dvh bg-[#f7fafc] text-[#102a43]">
       {toast && (
         <div
-          className={`fixed left-3 right-3 top-3 z-50 mx-auto flex max-w-md items-center gap-2 border px-3 py-3 text-sm font-black shadow-lg ${
+          className={`fixed left-3 right-3 top-3 z-50 mx-auto flex max-w-md items-center gap-2 border px-3 py-3 text-sm font-semibold shadow-lg ${
             toast.type === "error"
               ? "border-red-100 bg-red-50 text-red-700"
               : "border-emerald-100 bg-emerald-50 text-emerald-700"
@@ -1052,7 +1005,7 @@ const AddListing = () => {
               <ArrowLeft className="size-5" />
             </button>
             <div>
-              <h1 className="text-lg font-black tracking-normal">
+              <h1 className="text-lg font-semibold tracking-normal">
                 {isEditing ? "Edit Listing" : t("sellItem")}
               </h1>
               <p className="text-sm font-semibold text-[#102a43]/58">
@@ -1066,52 +1019,40 @@ const AddListing = () => {
         <section className=" border border-slate-100 bg-white p-3.5">
           <div className="mt-1 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="mb-1.5 block text-sm font-black text-[#102a43]">
+              <span className="mb-1.5 block text-sm font-semibold text-[#102a43]">
                 {t("category")}
               </span>
-              <select
-                className="h-12 w-full border border-slate-100 bg-white px-3 text-sm font-semibold text-[#102a43]  outline-none "
-                disabled={isLoadingCategories}
+              <CustomSelect
+                options={categories.map((category) => ({ label: category.title, value: category.id }))}
                 value={selectedCategoryId}
-                onChange={(event) => handleCategoryClick(event.target.value)}
-              >
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.title}
-                  </option>
-                ))}
-              </select>
+                onChange={handleCategoryClick}
+                disabled={isLoadingCategories}
+                placeholder="Select Category"
+                className="h-12 border-slate-100"
+                error={categoryError}
+              />
               {categoryError && (
-                <span className="mt-1 block text-xs font-bold text-red-500">
+                <span className="mt-1 block text-xs font-medium text-red-500">
                   {categoryError}
                 </span>
               )}
             </label>
 
             <label className="block">
-              <span className="mb-1.5 block text-sm font-black text-[#102a43]">
+              <span className="mb-1.5 block text-sm font-semibold text-[#102a43]">
                 {t("subcategory")}
               </span>
-              <select
-                className={`h-12 w-full border bg-white px-3 text-sm font-semibold text-[#102a43] outline-none ${
-                  validationErrors.subcategory
-                    ? "border-red-300 ring-1 ring-red-200"
-                    : "border-slate-100"
-                }`}
-                disabled={isLoadingCategories}
-                required
+              <CustomSelect
+                options={(selectedCategory?.items || []).map((item) => ({ label: item.name, value: item.id }))}
                 value={selectedSubcategoryId}
-                onChange={(event) => handleSubcategoryChange(event.target.value)}
-              >
-                <option value="">{t("selectSubcategory")}</option>
-                {selectedCategory?.items.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
+                onChange={handleSubcategoryChange}
+                disabled={isLoadingCategories}
+                placeholder={t("selectSubcategory")}
+                className={`h-12 border-slate-100 ${validationErrors.subcategory ? "border-red-300 ring-1 ring-red-200" : ""}`}
+                error={validationErrors.subcategory}
+              />
               {validationErrors.subcategory && (
-                <span className="mt-1 block text-xs font-bold text-red-500">
+                <span className="mt-1 block text-xs font-medium text-red-500">
                   {validationErrors.subcategory}
                 </span>
               )}
@@ -1126,7 +1067,7 @@ const AddListing = () => {
                 <Sparkles className="size-4" />
               </span>
               <div>
-                <h2 className="text-base font-black tracking-normal">
+                <h2 className="text-base font-semibold tracking-normal">
                   {t("listingDetails")}
                 </h2>
                 <p className="mt-1 text-sm font-semibold text-slate-500">
@@ -1137,7 +1078,7 @@ const AddListing = () => {
               </div>
             </div>
             {selectedSubcategory && (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#f1efff] px-3 py-1.5 text-sm font-black text-[#4d49b9]">
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#f1efff] px-3 py-1.5 text-sm font-semibold text-[#4d49b9]">
                 <CheckCircle2 className="size-3.5" />
                 {t("ready")}
               </span>
@@ -1173,96 +1114,67 @@ const AddListing = () => {
               </div>
             ))}
 
-            {customFields.map((field) => (
-              <div className="relative" key={field.name}>
-                <Field
-                  field={field}
-                  value={formValues[field.name]}
-                  error={validationErrors[field.name]}
-                  onChange={updateField}
-                />
-                <button
-                  aria-label={t("removeField", { field: field.label })}
-                  className="absolute right-2 top-0 grid size-7 place-items-center rounded-full text-slate-400 active:scale-95"
-                  type="button"
-                  onClick={() => removeCustomField(field.name)}
-                >
-                  <Trash2 className="size-4" />
-                </button>
-              </div>
-            ))}
           </div>
 
-          <label className="mt-3 block">
-            <span className="mb-1.5 block text-sm font-black text-[#102a43]">
+          {customFields.length > 0 && (
+            <div className="mt-5 rounded-xl border border-indigo-100 bg-indigo-50/40 p-4">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-indigo-100 text-indigo-600">
+                  <Sparkles className="size-3.5" />
+                </span>
+                <h3 className="text-sm font-bold text-indigo-900">Custom Details</h3>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {customFields.map((field) => (
+                  <div className="relative rounded-lg bg-white p-1 ring-1 ring-indigo-100 shadow-sm" key={field.name}>
+                    <div className="px-2 pt-1 pb-1">
+                      <Field
+                        field={field}
+                        value={formValues[field.name]}
+                        error={validationErrors[field.name]}
+                        onChange={updateField}
+                      />
+                    </div>
+                    <button
+                      aria-label={t("removeField", { field: field.label })}
+                      className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 transition-colors active:scale-95 shadow-sm"
+                      type="button"
+                      onClick={() => removeCustomField(field.name)}
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <label className="mt-4 block">
+            <span className="mb-1.5 block text-sm font-semibold text-[#102a43]">
               Offer Badge
             </span>
-            <select
-              className="h-12 w-full border border-slate-100 bg-white px-3 text-sm font-semibold text-[#102a43] outline-none"
+            <CustomSelect
+              options={offerBadgeOptions.map((badge) => ({ label: badge ? translateListingText(badge, t) : "No Badge", value: badge }))}
               value={formValues.offerBadge || ""}
-              onChange={(event) => updateField("offerBadge", event.target.value)}
-            >
-              {offerBadgeOptions.map((badge) => (
-                <option key={badge || "none"} value={badge}>
-                  {badge ? translateListingText(badge, t) : "No Badge"}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => updateField("offerBadge", val)}
+              placeholder="Select Badge"
+              className="h-12 border-slate-100"
+            />
           </label>
 
-          <div className="mt-3  border border-dashed border-[#c9c8ff] bg-[#fbfaff] p-3">
-            <div className="mb-3">
-              <h3 className="text-sm font-black text-[#102a43]">
-                {t("addCustomField")}
-              </h3>
-              <p className="mt-1 text-sm font-semibold text-slate-500">
-                {t("addMissingDetail")}
-              </p>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <input
-                className="h-12 w-full  border border-slate-100 bg-white px-3 text-sm font-semibold text-[#102a43]  outline-none placeholder:text-slate-400 "
-                placeholder={t("fieldName")}
-                type="text"
-                value={newField.label}
-                onChange={(event) =>
-                  setNewField((current) => ({
-                    ...current,
-                    label: event.target.value,
-                  }))
-                }
-              />
-              <select
-                className="h-12 w-full  border border-slate-100 bg-white px-3 text-sm font-semibold text-[#102a43] outline-none"
-                value={newField.type}
-                onChange={(event) =>
-                  setNewField((current) => ({
-                    ...current,
-                    type: event.target.value,
-                  }))
-                }
-              >
-                {customFieldTypes.map((fieldType) => (
-                  <option key={fieldType.value} value={fieldType.value}>
-                    {translateFormText(fieldType.label, language)}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="flex h-12 items-center justify-center gap-2  bg-[#7f7db6]  px-4 text-sm font-black text-white sm:col-span-2"
-                type="button"
-                onClick={addCustomField}
-              >
-                <Plus className="size-4" />
-                {t("add")}
-              </button>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsCustomFieldModalOpen(true)}
+            className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-sm font-bold text-white shadow-md shadow-indigo-200 transition-all hover:scale-[1.01] hover:shadow-lg active:scale-[0.99]"
+          >
+            <Plus className="size-5" />
+            Add Custom Field
+          </button>
 
           <div className="mt-3">
             <label className="flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-[#c9c8ff] bg-[#fbfaff] px-4 py-5 text-center transition hover:bg-[#f1efff]">
               <ImagePlus className="size-7 text-[#4d49b9]" />
-              <span className="text-sm font-black text-[#102a43]">
+              <span className="text-sm font-semibold text-[#102a43]">
                 {t("addProductPhotos")}
               </span>
               <span className="text-sm font-semibold text-slate-500">
@@ -1296,7 +1208,7 @@ const AddListing = () => {
                     />
                     
                     {index === 0 && (
-                      <span className="absolute bottom-0 left-0 right-0 bg-[#4d49b9] py-0.5 text-center text-[9px] font-black text-white">
+                      <span className="absolute bottom-0 left-0 right-0 bg-[#4d49b9] py-0.5 text-center text-[9px] font-semibold text-white">
                         Main
                       </span>
                     )}
@@ -1327,7 +1239,7 @@ const AddListing = () => {
           </div>
 
           <button
-            className="mt-4 flex h-12 w-full items-center justify-center gap-2  bg-[#7f7db6]  text-sm font-black text-white "
+            className="mt-4 flex h-12 w-full items-center justify-center gap-2  bg-[#7f7db6]  text-sm font-semibold text-white "
             disabled={isSubmitting}
             type="button"
             onClick={handlePostListing}
@@ -1337,6 +1249,55 @@ const AddListing = () => {
           </button>
         </section>
       </main>
+
+      {isCustomFieldModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-[#102a43]">{t("addCustomField")}</h3>
+                <p className="text-sm text-slate-500">{t("addMissingDetail")}</p>
+              </div>
+              <button onClick={() => setIsCustomFieldModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="size-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <label className="block">
+                <span className="mb-1 block text-sm font-semibold text-[#102a43]">{t("fieldName")}</span>
+                <input
+                  className="h-12 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-[#102a43] outline-none placeholder:text-slate-400 focus:border-[#4d49b9]"
+                  placeholder="e.g. Battery Health"
+                  type="text"
+                  value={newField.label}
+                  onChange={(event) => setNewField(current => ({ ...current, label: event.target.value }))}
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-sm font-semibold text-[#102a43]">Field Type</span>
+                <CustomSelect
+                  options={customFieldTypes.map(fieldType => ({ label: translateFormText(fieldType.label, language), value: fieldType.value }))}
+                  value={newField.type}
+                  onChange={(val) => setNewField(current => ({ ...current, type: val }))}
+                  placeholder="Select Type"
+                  className="h-12 border-slate-200 focus:border-[#4d49b9]"
+                />
+              </label>
+
+              <button
+                className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-md bg-[#7f7db6] text-sm font-bold text-white transition hover:bg-[#6c6aa4]"
+                type="button"
+                onClick={addCustomField}
+              >
+                <Plus className="size-4" />
+                {t("add")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

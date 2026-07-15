@@ -107,7 +107,7 @@ const ProductReviews = () => {
           </button>
           <div className="min-w-0">
             
-            <h1 className="truncate text-lg font-black tracking-normal">
+            <h1 className="truncate text-lg font-semibold tracking-normal">
               All reviews
             </h1>
             <p className="truncate text-xs font-semibold text-[#102a43]/58">
@@ -119,11 +119,11 @@ const ProductReviews = () => {
 
       <main className="mx-auto max-w-5xl px-3 pb-5 pt-3">
         <section className="mb-3 border border-[#e7e3ff] bg-white p-3.5">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fbfaff] px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#4d49b9] ring-1 ring-[#ebe7ff]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fbfaff] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#4d49b9] ring-1 ring-[#ebe7ff]">
             <MessageCircle className="size-3" />
             Reviews
           </span>
-          <h2 className="mt-3 text-xl font-black text-[#102a43] sm:text-2xl">
+          <h2 className="mt-3 text-xl font-semibold text-[#102a43] sm:text-2xl">
             {reviewSummary}
           </h2>
           <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
@@ -153,7 +153,7 @@ const ProductReviews = () => {
         ) : errorMessage ? (
           <section className="border border-slate-100 bg-white px-4 py-12 text-center">
             <PackageOpen className="mx-auto size-10 text-[#4d49b9]" />
-            <h2 className="mt-3 text-base font-black text-[#102a43]">
+            <h2 className="mt-3 text-base font-semibold text-[#102a43]">
               {errorMessage}
             </h2>
           </section>
@@ -171,14 +171,14 @@ const ProductReviews = () => {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
-                        <h3 className="text-sm font-black text-[#102a43]">
+                        <h3 className="text-sm font-semibold text-[#102a43]">
                           {review.name}
                         </h3>
                         <p className="text-xs font-semibold text-slate-500">
                           {review.date}
                         </p>
                       </div>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#fbfaff] px-2.5 py-1 text-xs font-black text-[#4d49b9] ring-1 ring-[#ebe7ff]">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#fbfaff] px-2.5 py-1 text-xs font-semibold text-[#4d49b9] ring-1 ring-[#ebe7ff]">
                         {review.rating}
                         <Star className="size-3 fill-[#4d49b9]" />
                       </span>
@@ -201,7 +201,7 @@ const ProductReviews = () => {
         ) : (
           <section className="border border-dashed border-slate-200 bg-white px-4 py-12 text-center">
             <MessageCircle className="mx-auto size-10 text-[#4d49b9]" />
-            <h2 className="mt-3 text-base font-black text-[#102a43]">
+            <h2 className="mt-3 text-base font-semibold text-[#102a43]">
               No reviews yet.
             </h2>
             <p className="mt-1 text-sm font-semibold text-slate-500">

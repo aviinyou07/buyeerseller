@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { logout } from '../services/marketplaceData'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
 
@@ -29,5 +30,18 @@ axiosClient.interceptors.request.use((config) => {
 
   return config
 })
+
+axiosClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      logout()
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
+    }
+    return Promise.reject(error)
+  }
+)
 
 export default axiosClient

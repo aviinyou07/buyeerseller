@@ -1,20 +1,27 @@
 import { useAppText } from '../appText'
+import CustomSelect from './CustomSelect'
 
 const LanguageSelect = () => {
   const { language, setLanguage, t } = useAppText()
 
+  const languageOptions = [
+    { label: t('english') || 'English', value: 'en' },
+    { label: t('hindi') || 'Hindi', value: 'hi' }
+  ]
+
   return (
-    <label className="flex items-center gap-2 text-xs font-bold text-gray-500">
+    <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
       <span>{t('language')}</span>
-      <select
-        className="rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-bold text-[#082b49] outline-none"
-        value={language}
-        onChange={(event) => setLanguage(event.target.value)}
-      >
-        <option value="en">{t('english')}</option>
-        <option value="hi">{t('hindi')}</option>
-      </select>
-    </label>
+      <div className="w-24">
+        <CustomSelect
+          options={languageOptions}
+          value={language}
+          onChange={setLanguage}
+          className="rounded-md border-gray-200 px-2 py-1.5 text-xs font-semibold text-[#082b49]"
+          dropdownClassName="min-w-[100px]"
+        />
+      </div>
+    </div>
   )
 }
 

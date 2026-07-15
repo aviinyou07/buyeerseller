@@ -319,7 +319,7 @@ const listingsearch = () => {
               <ArrowLeft className="size-5" />
             </button>
             <div className="min-w-0">
-              <h1 className="text-lg font-black">{t('searchInCategory', { category: selectedTitle })}</h1>
+              <h1 className="text-lg font-semibold">{t('searchInCategory', { category: selectedTitle })}</h1>
               <p className="text-xs font-semibold text-[#102a43]/58">
                 {t('resultsIn', { category: selectedTitle })}
               </p>
@@ -357,7 +357,7 @@ const listingsearch = () => {
               />
             </label>
             <button
-              className="h-11 w-full rounded-sm bg-[#7f7db6] text-sm font-black text-white"
+              className="h-11 w-full rounded-sm bg-[#7f7db6] text-sm font-semibold text-white"
               type="submit"
             >
               {t('searchMarketplace')}
@@ -369,7 +369,7 @@ const listingsearch = () => {
       <main className="mx-auto max-w-5xl space-y-4 px-3 pt-3">
         {activeField === 'location' ? (
           <section>
-            <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase text-slate-400">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-slate-400">
               <MapPin className="size-3.5" />
               {t('locationSuggestions')}
             </div>
@@ -377,7 +377,7 @@ const listingsearch = () => {
               {locationSuggestions.length > 0 ? (
                 locationSuggestions.map((location) => (
                   <button
-                    className="flex h-11 w-full items-center gap-2 px-3 text-left text-sm font-bold text-[#102a43]"
+                    className="flex h-11 w-full items-center gap-2 px-3 text-left text-sm font-medium text-[#102a43]"
                     key={location}
                     type="button"
                     onClick={() => handleLocationClick(location)}
@@ -395,7 +395,7 @@ const listingsearch = () => {
           </section>
         ) : (
           <section>
-            <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase text-slate-400">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-slate-400">
               <Search className="size-3.5" />
               {t('suggestions')}
             </div>
@@ -407,7 +407,7 @@ const listingsearch = () => {
               ) : listingsuggestions.length > 0 ? (
                 listingsuggestions.map((suggestion) => (
                   <button
-                    className="flex h-11 w-full items-center gap-2 px-3 text-left text-sm font-bold text-[#102a43]"
+                    className="flex h-11 w-full items-center gap-2 px-3 text-left text-sm font-medium text-[#102a43]"
                     key={suggestion}
                     type="button"
                     onClick={() => handleSuggestionClick(suggestion)}
@@ -428,12 +428,12 @@ const listingsearch = () => {
         {recentSearches.length > 0 && (
           <section>
             <div className="mb-2 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-xs font-black uppercase text-slate-400">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase text-slate-400">
                 <Clock3 className="size-3.5" />
                 {t('recentSearches')}
               </div>
               <button
-                className="text-xs font-black text-[#4d49b9]"
+                className="text-xs font-semibold text-[#4d49b9]"
                 type="button"
                 onClick={clearRecentSearches}
               >
@@ -443,7 +443,7 @@ const listingsearch = () => {
             <div className="flex flex-wrap gap-2">
               {recentSearches.map((item) => (
                 <button
-                  className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-[#4d49b9] ring-1 ring-[#ded2ff]"
+                  className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[#4d49b9] ring-1 ring-[#ded2ff]"
                   key={item.id}
                   type="button"
                   onClick={() => handleRecentClick(item)}

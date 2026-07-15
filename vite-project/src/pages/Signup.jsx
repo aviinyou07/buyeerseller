@@ -168,7 +168,7 @@ const Signup = () => {
     <div className="relative h-dvh overflow-hidden bg-white text-[#102a43]">
       {toast && (
         <div
-          className={`fixed left-1/2 top-4 z-40 flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 items-start gap-3 rounded-lg border bg-white px-4 py-3 text-sm font-bold  ${
+          className={`fixed left-1/2 top-4 z-40 flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 items-start gap-3 rounded-lg border bg-white px-4 py-3 text-sm font-medium  ${
             toast.type === "error"
               ? "border-red-100 text-red-700"
               : "border-[#ded9ff] text-[#102a43]"
@@ -191,7 +191,7 @@ const Signup = () => {
                 <span className="mx-auto grid size-12 place-items-center rounded-lg bg-[#f1efff] text-[#4d49b9] ring-1 ring-[#ded9ff]">
                   <UserRound size={24} />
                 </span>
-                <h1 className="mt-5 text-3xl font-black leading-tight text-[#102a43] sm:text-4xl">
+                <h1 className="mt-5 text-3xl font-semibold leading-tight text-[#102a43] sm:text-4xl">
                   {t("createAccount")}
                 </h1>
                 <p className="mt-3  text-sm font-semibold leading-6 text-slate-500">
@@ -202,13 +202,13 @@ const Signup = () => {
               {step === "details" ? (
                 <form className="space-y-4" onSubmit={handleSendOtp}>
                   <label className="block">
-                    <span className="mb-2 block text-xs font-black uppercase text-slate-400">
+                    <span className="mb-2 block text-xs font-semibold uppercase text-slate-400">
                       {t("fullName")}
                     </span>
                     <span className="flex h-13 items-center rounded-lg border border-slate-200 bg-[#fbfaff] px-3 transition focus-within:border-[#4d49b9] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#f1efff]">
                       <UserRound size={18} className="shrink-0 text-[#4d49b9]" />
                       <input
-                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-[#102a43] outline-none placeholder:text-slate-400"
+                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-medium text-[#102a43] outline-none placeholder:text-slate-400"
                         placeholder={t("fullName")}
                         value={fullName}
                         onChange={(event) => setFullName(event.target.value)}
@@ -217,13 +217,13 @@ const Signup = () => {
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-xs font-black uppercase text-slate-400">
+                    <span className="mb-2 block text-xs font-semibold uppercase text-slate-400">
                       Email address
                     </span>
                     <span className="flex h-13 items-center rounded-lg border border-slate-200 bg-[#fbfaff] px-3 transition focus-within:border-[#4d49b9] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#f1efff]">
                       <Mail size={18} className="shrink-0 text-[#4d49b9]" />
                       <input
-                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-[#102a43] outline-none placeholder:text-slate-400"
+                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-medium text-[#102a43] outline-none placeholder:text-slate-400"
                         placeholder="name@example.com"
                         type="email"
                         value={email}
@@ -233,16 +233,16 @@ const Signup = () => {
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-xs font-black uppercase text-slate-400">
+                    <span className="mb-2 block text-xs font-semibold uppercase text-slate-400">
                       {t("phoneNumber")}
                     </span>
                     <span className="flex h-13 items-center overflow-hidden rounded-lg border border-slate-200 bg-[#fbfaff] transition focus-within:border-[#4d49b9] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#f1efff]">
                       <span className="flex h-full items-center gap-2 border-r border-slate-200 bg-white px-3 text-[#102a43]">
                         <Phone size={18} className="text-[#4d49b9]" />
-                        <span className="text-sm font-black">+91</span>
+                        <span className="text-sm font-semibold">+91</span>
                       </span>
                       <input
-                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-[#102a43] outline-none placeholder:text-slate-400"
+                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-medium text-[#102a43] outline-none placeholder:text-slate-400"
                         inputMode="numeric"
                         maxLength={10}
                         placeholder={t("phoneNumber")}
@@ -254,13 +254,13 @@ const Signup = () => {
                   </label>
 
                   <label className="block">
-                    <span className="mb-2 block text-xs font-black uppercase text-slate-400">
+                    <span className="mb-2 block text-xs font-semibold uppercase text-slate-400">
                       Password
                     </span>
                     <span className="flex h-13 items-center rounded-lg border border-slate-200 bg-[#fbfaff] px-3 transition focus-within:border-[#4d49b9] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#f1efff]">
                       <ShieldCheck size={18} className="shrink-0 text-[#4d49b9]" />
                       <input
-                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-bold text-[#102a43] outline-none placeholder:text-slate-400"
+                        className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm font-medium text-[#102a43] outline-none placeholder:text-slate-400"
                         placeholder="Create a password"
                         type="password"
                         value={password}
@@ -270,7 +270,7 @@ const Signup = () => {
                   </label>
 
                   <button
-                    className="flex h-13 w-full items-center justify-center gap-2 rounded-lg bg-[#4d49b9] text-sm font-black text-white "
+                    className="flex h-13 w-full items-center justify-center gap-2 rounded-lg bg-[#4d49b9] text-sm font-semibold text-white "
                     disabled={loading}
                     type="submit"
                   >
@@ -291,17 +291,17 @@ const Signup = () => {
                 <form className="space-y-4" onSubmit={handleVerifyOtp}>
                   <div>
                     <div className="mb-2 flex items-center justify-between gap-3">
-                      <span className="text-xs font-black uppercase text-slate-400">
+                      <span className="text-xs font-semibold uppercase text-slate-400">
                         Verification code
                       </span>
-                      <span className="text-xs font-bold text-slate-500">
+                      <span className="text-xs font-medium text-slate-500">
                         {cleanEmail}
                       </span>
                     </div>
                     <div className="grid grid-cols-6 gap-2 sm:gap-3" onPaste={handleOtpPaste}>
                       {otp.map((digit, index) => (
                         <input
-                          className="aspect-square min-w-0 rounded-lg border border-slate-200 bg-[#fbfaff] text-center text-xl font-black text-[#102a43] outline-none transition focus:border-[#4d49b9] focus:bg-white focus:ring-4 focus:ring-[#f1efff] sm:text-2xl"
+                          className="aspect-square min-w-0 rounded-lg border border-slate-200 bg-[#fbfaff] text-center text-xl font-semibold text-[#102a43] outline-none transition focus:border-[#4d49b9] focus:bg-white focus:ring-4 focus:ring-[#f1efff] sm:text-2xl"
                           inputMode="numeric"
                           key={index}
                           maxLength={1}
@@ -317,12 +317,12 @@ const Signup = () => {
                     </div>
                   </div>
 
-                  <p className="rounded-lg bg-[#f1efff] px-4 py-3 text-xs font-bold leading-5 text-[#4d49b9] ring-1 ring-[#ded9ff]">
+                  <p className="rounded-lg bg-[#f1efff] px-4 py-3 text-xs font-medium leading-5 text-[#4d49b9] ring-1 ring-[#ded9ff]">
                     {t("otpSentTo")} {cleanEmail}.
                   </p>
 
                   <button
-                    className="flex h-13 w-full items-center justify-center gap-2 rounded-lg bg-[#4d49b9] text-sm font-black text-white "
+                    className="flex h-13 w-full items-center justify-center gap-2 rounded-lg bg-[#4d49b9] text-sm font-semibold text-white "
                     disabled={loading || otp.join("").length !== 6}
                     type="submit"
                   >
@@ -340,7 +340,7 @@ const Signup = () => {
                   </button>
 
                   <button
-                    className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white text-sm font-black text-[#102a43]"
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white text-sm font-semibold text-[#102a43]"
                     type="button"
                     onClick={() => {
                       setOtp(["", "", "", "", "", ""]);
@@ -356,7 +356,7 @@ const Signup = () => {
               <p className="mt-6 text-center text-sm font-semibold text-slate-500">
                 {t("haveAccount")}
                 <button
-                  className="ml-1 font-black text-[#4d49b9] "
+                  className="ml-1 font-semibold text-[#4d49b9] "
                   type="button"
                   onClick={() => navigate("/login")}
                 >
@@ -376,10 +376,10 @@ const Signup = () => {
                   <Store size={21} />
                 </span>
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/55">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
                     {t("join")}
                   </p>
-                  <p className="text-sm font-black">{t("createAccount")}</p>
+                  <p className="text-sm font-semibold">{t("createAccount")}</p>
                 </div>
               </div>
             </div>
@@ -399,11 +399,11 @@ const Signup = () => {
                       <div className="mt-2 h-3 w-14 rounded bg-white/25" />
                     </div>
                     <div className="col-span-2 flex items-center justify-between rounded-lg bg-white px-4 py-3 ">
-                      <span className="flex items-center gap-2 text-sm font-black">
+                      <span className="flex items-center gap-2 text-sm font-semibold">
                         <CheckCircle2 className="size-5 text-[#4d49b9]" />
                         Secure signup
                       </span>
-                      <span className="rounded-full bg-[#f1efff] px-3 py-1 text-xs font-black text-[#4d49b9]">
+                      <span className="rounded-full bg-[#f1efff] px-3 py-1 text-xs font-semibold text-[#4d49b9]">
                         OTP
                       </span>
                     </div>
@@ -411,7 +411,7 @@ const Signup = () => {
                 </div>
               </div>
 
-              <h2 className="mt-4 text-2xl font-black leading-tight">
+              <h2 className="mt-4 text-2xl font-semibold leading-tight">
                 Create your account and start exploring trusted listings.
               </h2>
               <p className="mt-3 max-w-sm text-sm font-semibold leading-6 text-white/68">
@@ -419,7 +419,7 @@ const Signup = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 text-xs font-black text-white/70">
+            <div className="grid grid-cols-3 gap-3 text-xs font-semibold text-white/70">
               <span className="rounded-lg bg-white/10 px-3 py-3 ring-1 ring-white/10">
                 Verified
               </span>

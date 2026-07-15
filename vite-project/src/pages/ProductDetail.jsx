@@ -344,12 +344,12 @@ const isDisplayableValue = (value) =>
   String(value).trim()
 
 const getOverviewFields = (product) => {
-  const savedFields = (Array.isArray(product.overviewFields) ? product.overviewFields : [])
-    .filter((field) => !hiddenOverviewFields.has(field.name))
-  const usedNames = new Set(savedFields.map((field) => field.name))
+  const customFieldsRaw = (Array.isArray(product.overviewFields) ? product.overviewFields : [])
+    .filter((field) => !hiddenOverviewFields.has(field.name || field.label))
+  const usedNames = new Set(customFieldsRaw.map((field) => field.name || field.label))
   const specNames = new Set(specFields.map((field) => field.name))
   const standardFields = specFields
-    .filter((field) => !usedNames.has(field.name))
+    .filter((field) => !usedNames.has(field.name) && !usedNames.has(field.label))
     .map((field) => ({
       ...field,
       value: product[field.name],
@@ -368,13 +368,23 @@ const getOverviewFields = (product) => {
       value,
     }))
 
-  return [...savedFields, ...standardFields, ...looseFields]
+  const standardSpecs = [...standardFields, ...looseFields]
     .map((field) => ({
       label: field.label,
       name: field.name || field.label,
       value: field.value,
     }))
     .filter((field) => String(field.value || '').trim())
+
+  const customSpecs = customFieldsRaw
+    .map((field) => ({
+      label: field.label,
+      name: field.name || field.label,
+      value: field.value,
+    }))
+    .filter((field) => String(field.value || '').trim())
+
+  return { standardSpecs, customSpecs }
 }
 
 const ProductDetailSkeleton = ({ t, categoryTitle, onBack }) => (
@@ -390,7 +400,7 @@ const ProductDetailSkeleton = ({ t, categoryTitle, onBack }) => (
           <ArrowLeft className="size-5" />
         </button>
         <div className="min-w-0">
-          <h1 className="truncate text-lg font-black tracking-normal">
+          <h1 className="truncate text-lg font-semibold tracking-normal">
             {t('productDetails')}
           </h1>
           <p className="text-xs font-semibold text-[slate-900]/58">
@@ -503,7 +513,7 @@ const ProductDetail = () => {
   )
   const [selectedImage, setSelectedImage] = useState('')
 
-  const specs = product ? getOverviewFields(product) : []
+  const { standardSpecs, customSpecs } = product ? getOverviewFields(product) : { standardSpecs: [], customSpecs: [] }
   const activeImage = selectedImage || galleryImages[0]
   const chatUrl = sellerPhone
     ? `https://wa.me/${sellerPhone}?text=${encodeURIComponent(
@@ -918,14 +928,14 @@ const ProductDetail = () => {
             >
               <ArrowLeft className="size-5" />
             </button>
-            <h1 className="truncate text-lg font-black tracking-normal">
+            <h1 className="truncate text-lg font-semibold tracking-normal">
               {t('productDetails')}
             </h1>
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-3 pt-3">
           <section className="border border-slate-100 bg-white px-4 py-12 text-center">
-            <h2 className="text-base font-black text-[slate-900]">
+            <h2 className="text-base font-semibold text-[slate-900]">
               {errorMessage || 'Product not found.'}
             </h2>
           </section>
@@ -947,7 +957,7 @@ const ProductDetail = () => {
             <ArrowLeft className="size-5" />
           </button>
           <div className="min-w-0">
-            <h1 className="truncate text-lg font-black tracking-normal">
+            <h1 className="truncate text-lg font-semibold tracking-normal">
               {t('productDetails')}
             </h1>
             <p className="text-xs font-semibold text-[slate-900]/58">
@@ -960,7 +970,7 @@ const ProductDetail = () => {
       <main className="mx-auto max-w-5xl space-y-3  pb-4">
         <section className="overflow-hidden  border border-slate-100 bg-white ">
           <div
-            className="relative h-72 bg-[#f1efff] sm:h-80 md:h-96"
+            className="relative h-72 bg-white sm:h-80 md:h-96"
             role="button"
             tabIndex={0}
             onDoubleClick={handleLikeToggle}
@@ -1009,7 +1019,7 @@ const ProductDetail = () => {
               </div>
             )}
             {product.isFeatured && (
-              <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-black text-[#4d49b9] ">
+              <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#4d49b9] ">
                 <Star className="size-3.5" />
                 {t('featured')}
               </span>
@@ -1019,7 +1029,7 @@ const ProductDetail = () => {
           <div className="flex gap-4 overflow-x-auto border-b border-slate-100 p-2.5">
             {galleryImages.map((image, index) => (
               <button
-                className={`h-20 w-20 md:w-26 md:h-26 shrink-0 overflow-hidden bg-[#f1efff] sm:h-20 sm:w-20  ${
+                className={`h-20 w-20 md:w-26 md:h-26 shrink-0 overflow-hidden bg-white sm:h-20 sm:w-20  ${
                   activeImage === image
                     ? 'border-[#c9c8ff] '
                     : 'border-slate-100'
@@ -1040,21 +1050,21 @@ const ProductDetail = () => {
           <div className="p-3.5">
             <div className="flex flex-col gap-1">
               <div className="w-full">
-                <h2 className="text-[20px] font-black leading-[1.3] tracking-tight text-[#102a43] line-clamp-2">
+                <h2 className="text-[20px] font-semibold leading-[1.3] tracking-tight text-[#102a43] line-clamp-2">
                   {translatedProductTitle || product.title}
                 </h2>
               </div>
               <div className="w-full flex justify-end">
-                <p className="text-[26px] font-black text-[#102a43]">
+                <p className="text-[26px] font-semibold text-[#102a43]">
                   {formatPrice(product.price)}
                 </p>
               </div>
             </div>
 
             <div className="mt-3 flex items-end justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
                 {product.isVerified && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#f1efff] px-2.5 py-1.5 text-xs font-black text-[#4d49b9]">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#f1efff] px-2.5 py-1.5 text-xs font-semibold text-[#4d49b9]">
                     <BadgeCheck className="size-3.5" />
                     {t('verified')}
                   </span>
@@ -1123,10 +1133,10 @@ const ProductDetail = () => {
                       <StatIcon className="size-3.5 sm:size-4" strokeWidth={2.5} />
                     </span>
                     <div className="mt-1 min-w-0 sm:mt-0">
-                      <p className="text-[9px] font-black uppercase text-slate-500 sm:text-[11px]">
+                      <p className="text-[9px] font-semibold uppercase text-slate-500 sm:text-[11px]">
                         {stat.label}
                       </p>
-                      <p className="mt-0.5 truncate text-sm font-black text-[#082b49] sm:text-base">
+                      <p className="mt-0.5 truncate text-sm font-semibold text-[#082b49] sm:text-base">
                         {stat.value}
                       </p>
                     </div>
@@ -1138,14 +1148,14 @@ const ProductDetail = () => {
         )}
 
         <section className=" border border-slate-100 bg-white p-3.5 ">
-          <h2 className="text-lg font-black tracking-normal">{t('overview')}</h2>
+          <h2 className="text-lg font-semibold tracking-normal">{t('overview')}</h2>
           <div className="mt-3 grid md:grid-cols-3 gap-2 grid-cols-2">
-            {specs.map((item) => (
+            {standardSpecs.map((item) => (
               <div className=" bg-[#fbfaff] p-3 ring-1 ring-slate-100" key={`${item.name}-${item.label}`}>
-                <p className="text-[11px] font-black uppercase text-slate-400">
+                <p className="text-[11px] font-semibold uppercase text-slate-400">
                   {translateDetailText(item.label, t)}
                 </p>
-                <p className="mt-1 text-sm font-black text-[slate-900]">
+                <p className="mt-1 text-sm font-semibold text-[slate-900]">
                   {translateDetailText(item.value, t)}
                 </p>
               </div>
@@ -1153,8 +1163,26 @@ const ProductDetail = () => {
           </div>
         </section>
 
+        {customSpecs.length > 0 && (
+          <section className=" border border-slate-100 bg-white p-3.5 mt-3">
+            <h2 className="text-lg font-semibold tracking-normal">Seller Custom Details</h2>
+            <div className="mt-3 grid md:grid-cols-3 gap-2 grid-cols-2">
+              {customSpecs.map((item) => (
+                <div className=" bg-[#fbfaff] p-3 ring-1 ring-slate-100" key={`${item.name}-${item.label}`}>
+                  <p className="text-[11px] font-semibold uppercase text-slate-400">
+                    {translateDetailText(item.label, t)}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[slate-900]">
+                    {translateDetailText(item.value, t)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className=" border border-slate-100 bg-white p-3.5 ">
-          <h2 className="text-lg font-black tracking-normal">{t('description')}</h2>
+          <h2 className="text-lg font-semibold tracking-normal">{t('description')}</h2>
           <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
             {translatedProductDescription || product.description || ''}
           </p>
@@ -1164,7 +1192,7 @@ const ProductDetail = () => {
               t('inspectBeforePayment'),
               t('meetSafeLocation'),
             ].map((tip) => (
-              <div className="flex items-center gap-2 text-sm font-bold" key={tip}>
+              <div className="flex items-center gap-2 text-sm font-medium" key={tip}>
                 <CheckCircle2 className="size-4 shrink-0 text-[#4d49b9]" />
                 {tip}
               </div>
@@ -1176,11 +1204,11 @@ const ProductDetail = () => {
           <section className="overflow-hidden  border border-[#e7e3ff] bg-white">
             <div className="flex items-center justify-between gap-3 bg-[#fbfaff] px-4 py-3.5">
               <div className="min-w-0">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#4d49b9] ring-1 ring-[#ebe7ff]">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#4d49b9] ring-1 ring-[#ebe7ff]">
                   <MessageCircle className="size-3" />
                   Buyer feedback
                 </span>
-                <h2 className="mt-2 text-lg font-black tracking-normal text-[slate-900]">
+                <h2 className="mt-2 text-lg font-semibold tracking-normal text-[slate-900]">
                   Reviews
                 </h2>
                 <p className="mt-1 text-xs font-semibold text-slate-500">
@@ -1204,7 +1232,7 @@ const ProductDetail = () => {
                 onSubmit={handleReviewSubmit}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-black text-[slate-900]">Rate this listing</p>
+                  <p className="text-sm font-semibold text-[slate-900]">Rate this listing</p>
                   <div className="flex items-center gap-1 rounded-full bg-[#fbfaff] p-1 ring-1 ring-[#ebe7ff]">
                     {Array.from({ length: 5 }).map((_, index) => {
                       const ratingValue = index + 1
@@ -1261,14 +1289,14 @@ const ProductDetail = () => {
                 )}
 
                 {reviewMessage && (
-                  <p className="mt-3 rounded-xl bg-[#f1efff] px-3 py-2 text-xs font-black text-[#4d49b9]">
+                  <p className="mt-3 rounded-xl bg-[#f1efff] px-3 py-2 text-xs font-semibold text-[#4d49b9]">
                     {reviewMessage}
                   </p>
                 )}
 
                 <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
                   <button
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-5 text-sm font-black text-white shadow-sm shadow-indigo-200 transition hover:opacity-90 active:scale-95"
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-5 text-sm font-semibold text-white shadow-sm shadow-indigo-200 transition hover:opacity-90 active:scale-95"
                     disabled={isReviewPosting || !reviewText.trim()}
                     type="submit"
                   >
@@ -1293,14 +1321,14 @@ const ProductDetail = () => {
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div>
-                            <h3 className="text-sm font-black text-[slate-900]">
+                            <h3 className="text-sm font-semibold text-[slate-900]">
                               {review.name}
                             </h3>
                             <p className="text-xs font-semibold text-slate-500">
                               {review.date}
                             </p>
                           </div>
-                          <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-black text-[#4d49b9] ring-1 ring-[#ebe7ff]">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#4d49b9] ring-1 ring-[#ebe7ff]">
                             {review.rating}
                             <Star className="size-3 fill-[#4d49b9]" />
                           </span>
@@ -1321,7 +1349,7 @@ const ProductDetail = () => {
                 ))
               ) : (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-[#fbfaff] px-4 py-8 text-center">
-                  <p className="text-sm font-black text-[slate-900]">No reviews yet.</p>
+                  <p className="text-sm font-semibold text-[slate-900]">No reviews yet.</p>
                   <p className="mt-1 text-xs font-semibold text-slate-500">
                     Be the first buyer to share feedback.
                   </p>
@@ -1330,7 +1358,7 @@ const ProductDetail = () => {
 
               {hasMoreReviews && (
                 <button
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-sm border border-[#ded2ff] bg-white text-sm font-black text-[#4d49b9] "
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-sm border border-[#ded2ff] bg-white text-sm font-semibold text-[#4d49b9] "
                   type="button"
                   onClick={() =>
                     navigate(`/listings/${subcategoryId}/${productId}/reviews`, {
@@ -1354,11 +1382,11 @@ const ProductDetail = () => {
         {isOwner && interestedUsers.length > 0 && (
           <section className="mt-4 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
             <div className="border-b border-slate-100 bg-[#fbfaff] px-4 py-3.5">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-600 ring-1 ring-indigo-100">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-600 ring-1 ring-indigo-100">
                 <UserRound className="size-3" />
                 Interested Customers
               </span>
-              <h2 className="mt-2 text-lg font-black tracking-normal text-slate-900">
+              <h2 className="mt-2 text-lg font-semibold tracking-normal text-slate-900">
                 Connected Buyers
               </h2>
               <p className="mt-1 text-xs font-semibold text-slate-500">
@@ -1372,7 +1400,7 @@ const ProductDetail = () => {
                     <UserRound className="size-5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-black text-slate-900">
+                    <h3 className="truncate text-sm font-semibold text-slate-900">
                       {u.full_name || 'Customer'}
                     </h3>
                     <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
@@ -1394,10 +1422,10 @@ const ProductDetail = () => {
                 <UserRound className="size-6" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-black uppercase tracking-wider text-indigo-600">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600">
                   Seller details
                 </p>
-                <h2 className="truncate text-[15px] font-black text-slate-900">
+                <h2 className="truncate text-[15px] font-semibold text-slate-900">
                   {product.sellerName || t('localSeller')}
                 </h2>
                 <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
@@ -1405,21 +1433,29 @@ const ProductDetail = () => {
                 </p>
               </div>
               <div className="flex flex-col items-end gap-1.5 shrink-0">
-                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-black text-white shadow-sm">
-                  {product.sellerRating > 0 ? product.sellerRating.toFixed(1) : 'New'}
-                  <Star className="size-3 fill-white" />
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-black text-indigo-600 ring-1 ring-indigo-200">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-600 ring-1 ring-emerald-200">
                   <ShieldCheck className="size-3" />
                   {t('safe')}
                 </span>
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`size-3.5 ${
+                        product.sellerRating >= i + 0.5
+                          ? 'fill-amber-500 text-amber-500'
+                          : 'fill-slate-200 text-slate-200'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {sellerPhone && (
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <button
-                  className="flex h-12 items-center justify-center gap-2 rounded-xl bg-white text-[14px] font-black text-indigo-700 shadow-sm ring-1 ring-indigo-200 transition-all hover:bg-indigo-50 active:scale-95"
+                  className="flex h-12 items-center justify-center gap-2 rounded-xl bg-white text-[14px] font-semibold text-indigo-700 shadow-sm ring-1 ring-indigo-200 transition-all hover:bg-indigo-50 active:scale-95"
                   type="button"
                   onClick={handleChatClick}
                 >
@@ -1427,7 +1463,7 @@ const ProductDetail = () => {
                   {t('chat')}
                 </button>
                 <button
-                  className="flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-[14px] font-black text-white shadow-md shadow-indigo-200 transition-all hover:opacity-90 active:scale-95"
+                  className="flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-[14px] font-semibold text-white shadow-md shadow-indigo-200 transition-all hover:opacity-90 active:scale-95"
                   type="button"
                   onClick={handleCallClick}
                 >

@@ -34,7 +34,7 @@ const SplashScreen = () => {
         </div>
 
         {/* App Name */}
-        <h1 className="mt-6 text-3xl font-black tracking-tight text-[#102a43] sm:text-4xl">
+        <h1 className="mt-6 text-3xl font-semibold tracking-tight text-[#102a43] sm:text-4xl">
           Marketplace
         </h1>
 

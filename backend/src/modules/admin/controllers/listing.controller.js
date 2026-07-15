@@ -145,7 +145,7 @@ const listListings = async (req, res) => {
        LEFT JOIN categories cat    ON cat.id = sub.category_id
        LEFT JOIN users u           ON u.id   = p.seller_id
        ${where}
-       ORDER BY p.is_featured DESC, p.created_at DESC
+       ORDER BY p.created_at DESC
        LIMIT ? OFFSET ?`,
       [...params, limitNum, offset],
     );
@@ -407,7 +407,7 @@ const updateListing = async (req, res) => {
 
   // check product exists
   const [existing] = await pool.query(
-    "SELECT id, title FROM listings WHERE id = ? LIMIT 1",
+    "SELECT id, title, meta FROM listings WHERE id = ? LIMIT 1",
     [id],
   );
   if (!existing[0]) return error(res, "Listing not found", 404);
@@ -446,6 +446,21 @@ const updateListing = async (req, res) => {
       subcategory_id:
         raw.subcategory_id != null ? coerceInt(raw.subcategory_id) : undefined,
     };
+    
+    if (raw.custom_fields !== undefined) {
+      let parsedMeta = {};
+      try {
+        parsedMeta = typeof existing[0].meta === 'string' ? JSON.parse(existing[0].meta) : (existing[0].meta || {});
+      } catch (e) {}
+      
+      let newCustomFields = [];
+      try {
+        newCustomFields = typeof raw.custom_fields === 'string' ? JSON.parse(raw.custom_fields) : raw.custom_fields;
+      } catch(e) {}
+
+      parsedMeta.overviewFields = newCustomFields;
+      map.meta = JSON.stringify(parsedMeta);
+    }
     for (const [k, v] of Object.entries(map)) {
       if (v !== undefined) {
         sets.push(`\`${k}\` = ?`);
